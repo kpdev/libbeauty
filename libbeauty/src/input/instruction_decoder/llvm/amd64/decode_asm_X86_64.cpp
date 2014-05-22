@@ -113,18 +113,18 @@ int DecodeAsmX86_64::setup() {
 		return 1;
 
 	// Set up disassembler.
-	DisAsm = TheTarget->createMCDisassembler(*STI);
+	DisAsm = TheTarget->createMCDisassembler(*STI, *Ctx);
 	if (!DisAsm)
 		return 1;
 
-	OwningPtr<MCRelocationInfo> RelInfo(
+	std::unique_ptr<MCRelocationInfo> RelInfo(
 		TheTarget->createMCRelocationInfo(TripleName, *Ctx));
 	if (!RelInfo)
 		return 1;
 
-	std::unique_ptr<MCSymbolizer> Symbolizer(
-		TheTarget->createMCSymbolizer(TripleName, GetOpInfo, SymbolLookUp, DisInfo,
-			Ctx, RelInfo.take()));
+	//std::unique_ptr<MCSymbolizer> Symbolizer(
+	//	TheTarget->createMCSymbolizer(TripleName, GetOpInfo, SymbolLookUp, DisInfo,
+	//		Ctx, RelInfo));
 	//DisAsm->setSymbolizer(Symbolizer);
 	//DisAsm->setupForSymbolicDisassembly(GetOpInfo, SymbolLookUp, DisInfo, Ctx, RelInfo);
 
