@@ -496,9 +496,9 @@ uint32_t output_function_name(int fd,
 {
 	int tmp;
 
-	debug_print(DEBUG_OUTPUT, 1, "int %s()\n{\n", external_entry_point->name);
+	debug_print(DEBUG_OUTPUT, 1, "%s()\n{\n", external_entry_point->name);
 	debug_print(DEBUG_OUTPUT, 1, "value = %"PRIx64"\n", external_entry_point->value);
-	tmp = dprintf(fd, "int %s(", external_entry_point->name);
+	tmp = dprintf(fd, "%s(", external_entry_point->name);
 	return 0;
 }
 

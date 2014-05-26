@@ -260,6 +260,7 @@ struct external_entry_point_s {
 	struct process_state_s process_state;
 	char *name;
 	/* FIXME: Handle variable amount of params */
+	/* param types are stored in the label */
 	int params_size;
 	int *params;
 	int *params_order;
@@ -267,6 +268,8 @@ struct external_entry_point_s {
 	int locals_size;
 	int *locals;
 	int *locals_order;
+	/* The function returns a type. This is identified by the label used. */
+	int returned_label;
 	int start_node;
 	int paths_size;
 	struct path_s *paths;

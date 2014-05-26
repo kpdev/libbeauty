@@ -1519,7 +1519,8 @@ int assign_labels_to_dst(struct self_s *self, int entry_point, int node)
 	int inst;
 	int tmp;
 	
-	debug_print(DEBUG_MAIN, 1, "Start variable_id = 0x%x\n", variable_id);
+	debug_print(DEBUG_MAIN, 1, "START entry_point = 0x%x, node = 0x%x, Start variable_id = 0x%x\n",
+		entry_point, node, variable_id);
 	next = nodes[node].inst_start;
 	do {
 		struct label_s label;
@@ -2370,6 +2371,7 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 			debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:RET srcA given value_id = 0x%"PRIx64"\n",
 				entry_point, inst,
 				inst_log1->value1.value_id); 
+			external_entry_point->returned_label = inst_log1->value1.value_id;
 			break;
 		case JMP:
 			break;
@@ -6026,10 +6028,17 @@ int main(int argc, char *argv[])
 			external_entry_points[l].type == 1) {
 			struct process_state_s *process_state;
 			int tmp_state;
+			struct label_s *label;
 			
 			process_state = &external_entry_points[l].process_state;
 
 			tmp = dprintf(fd, "\n");
+			label = &(external_entry_points[l].labels[external_entry_points[l].returned_label]);
+			dprintf(fd, "int%"PRId64"_t ",
+				label->size_bits);
+			if (label->lab_pointer) {
+				dprintf(fd, "*");
+			}
 			output_function_name(fd, &external_entry_points[l]);
 			tmp_state = 0;
 			for (m = 0; m < REG_PARAMS_ORDER_MAX; m++) {
