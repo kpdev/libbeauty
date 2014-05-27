@@ -1847,9 +1847,9 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
  
 		/* FIXME: Currently this is a NOP. Need lenght to come from entry_point */
 		/* Get value of dstA */
-		inst->value3.start_address = 8;
+		inst->value3.start_address = instruction->dstA.index;
 		/* FIXME: get length from entry_point */
-		inst->value3.length = 8;
+		inst->value3.length = instruction->dstA.value_size;
 		inst->value3.init_value_type = 0;
 		inst->value3.init_value = 0;
 		inst->value3.offset_value = 0;
