@@ -636,8 +636,11 @@ int get_value_id_from_node_reg(struct self_s *self, int entry_point, int node, i
 	return ret;
 }
 
-int init_node_used_register_table(struct self_s *self, struct control_flow_node_s *nodes, int nodes_size)
+int init_node_used_register_table(struct self_s *self, int entry_point)
 {
+	struct external_entry_point_s *external_entry_points = self->external_entry_points;
+	struct control_flow_node_s *nodes = external_entry_points[entry_point].nodes;
+	int nodes_size = external_entry_points[entry_point].nodes_size;
 	int node;
 	for (node = 1; node < nodes_size; node++) {
 		if (!nodes[node].valid) {
@@ -649,8 +652,11 @@ int init_node_used_register_table(struct self_s *self, struct control_flow_node_
 	return 0;
 }
 
-int print_node_used_register_table(struct self_s *self, struct control_flow_node_s *nodes, int nodes_size)
+int print_node_used_register_table(struct self_s *self, int entry_point)
 {
+	struct external_entry_point_s *external_entry_points = self->external_entry_points;
+	struct control_flow_node_s *nodes = external_entry_points[entry_point].nodes;
+	int nodes_size = external_entry_points[entry_point].nodes_size;
 	int node;
 	int n;
 
@@ -661,7 +667,8 @@ int print_node_used_register_table(struct self_s *self, struct control_flow_node
 		}
 		for (n = 0; n < MAX_REG; n++) {
 			if (nodes[node].used_register[n].seen) {
-				debug_print(DEBUG_MAIN, 1, "node 0x%x:node_used_reg 0x%x:seen=0x%x, size=0x%x, src=0x%x, dst=0x%x, src_first=0x%x, value_id=0x%x, node=0x%x, label=0x%x\n",
+				debug_print(DEBUG_MAIN, 1, "entry_point 0x%x, node 0x%x:node_used_reg 0x%x:seen=0x%x, size=0x%x, src=0x%x, dst=0x%x, src_first=0x%x, value_id=0x%x, node=0x%x, label=0x%x\n",
+					entry_point,
 					node,
 					n,
 					nodes[node].used_register[n].seen,
@@ -678,8 +685,11 @@ int print_node_used_register_table(struct self_s *self, struct control_flow_node
 	return 0;
 }
 
-int fill_node_used_register_table(struct self_s *self, struct control_flow_node_s *nodes, int nodes_size)
+int fill_node_used_register_table(struct self_s *self, int entry_point)
 {
+	struct external_entry_point_s *external_entry_points = self->external_entry_points;
+	struct control_flow_node_s *nodes = external_entry_points[entry_point].nodes;
+	int nodes_size = external_entry_points[entry_point].nodes_size;
 	int node;
 	int inst;
 	struct inst_log_entry_s *inst_log1;
@@ -692,7 +702,7 @@ int fill_node_used_register_table(struct self_s *self, struct control_flow_node_
 			continue;
 		}
 		inst = nodes[node].inst_start;
-		debug_print(DEBUG_MAIN, 1, "In Block:0x%x\n", node);
+		debug_print(DEBUG_MAIN, 1, "Entry_point:0x%x, In Block:0x%x\n", entry_point, node);
 		do {
 			debug_print(DEBUG_MAIN, 1, "inst:0x%x\n", inst);
 			inst_log1 = &inst_log_entry[inst];
@@ -4771,12 +4781,12 @@ int main(int argc, char *argv[])
 	/* FIXME: TODO convert nodes to external_entry_points[l].nodes */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
-			tmp = init_node_used_register_table(self, external_entry_points[l].nodes, external_entry_points[l].nodes_size);
+			tmp = init_node_used_register_table(self, l);
 		}
 	}
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
-			tmp = fill_node_used_register_table(self, external_entry_points[l].nodes, external_entry_points[l].nodes_size);
+			tmp = fill_node_used_register_table(self, l);
 			if (tmp) {
 				debug_print(DEBUG_MAIN, 1, "FIXME: fill node used register table failed\n");
 				exit(1);
@@ -4786,7 +4796,7 @@ int main(int argc, char *argv[])
 	/* print node_used_register_table */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
-			tmp = print_node_used_register_table(self, external_entry_points[l].nodes, external_entry_points[l].nodes_size);
+			tmp = print_node_used_register_table(self, l);
 			if (tmp) {
 				debug_print(DEBUG_MAIN, 1, "FIXME: print node used register table failed\n");
 				exit(1);
@@ -4958,7 +4968,7 @@ int main(int argc, char *argv[])
 	/* print node_used_register_table */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
-			tmp = print_node_used_register_table(self, external_entry_points[l].nodes, external_entry_points[l].nodes_size);
+			tmp = print_node_used_register_table(self, l);
 			if (tmp) {
 				debug_print(DEBUG_MAIN, 1, "FIXME: print node used register table failed\n");
 				exit(1);
