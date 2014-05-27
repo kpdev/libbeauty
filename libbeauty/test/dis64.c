@@ -1528,9 +1528,11 @@ int assign_labels_to_dst(struct self_s *self, int entry_point, int node)
 		inst_log1 =  &inst_log_entry[inst];
 		instruction =  &inst_log1->instruction;
 		/* returns 0 for id and label set. 1 for error */
-		debug_print(DEBUG_MAIN, 1, "START\n");
+		debug_print(DEBUG_MAIN, 1, "START1 entry_point = 0x%x, node = 0x%x, inst = 0x%x, variable_id = 0x%x\n",
+			entry_point, node, inst, variable_id);
 		debug_print(DEBUG_MAIN, 1, "label address = %p\n", &label);
 		tmp  = assign_id_label_dst(self, entry_point, node, inst_log1, &label);
+#if 0
 		debug_print(DEBUG_MAIN, 1, "value to log_to_label:inst = 0x%x: 0x%x, 0x%"PRIx64", 0x%x, 0x%x, 0x%"PRIx64", 0x%"PRIx64"\n",
 			inst,
 			instruction->dstA.indirect,
@@ -1539,11 +1541,11 @@ int assign_labels_to_dst(struct self_s *self, int entry_point, int node)
 			inst_log1->value3.value_scope,
 			inst_log1->value3.value_id,
 			inst_log1->value3.indirect_offset_value);
-
+#endif
 		if (!tmp) {
 			debug_print(DEBUG_MAIN, 1, "variable_id = %x\n", variable_id);
 			if (variable_id >= 10000) {
-				debug_print(DEBUG_MAIN, 1, "variable_id overrun 10000 limit. Trying to write to %d\n", variable_id);
+				debug_print(DEBUG_MAIN, 1, "ERROR: variable_id overrun 10000 limit. Trying to write to %d\n", variable_id);
 				exit(1);
 			}
 			label_redirect[variable_id].redirect = variable_id;
@@ -1555,21 +1557,24 @@ int assign_labels_to_dst(struct self_s *self, int entry_point, int node)
 			variable_id++;
 			/* Needed by assign_id_label_dst() */
 			external_entry_point->variable_id = variable_id;
+			debug_print(DEBUG_MAIN, 1, "variable_id increased to = %x\n", variable_id);
 		} else {
-			debug_print(DEBUG_MAIN, 1, "assign_id_label_dst() failed\n");
+			debug_print(DEBUG_MAIN, 1, "ERROR: assign_id_label_dst() failed. entry_point = 0x%x, node = 0x%x, inst = 0x%x\n",
+				entry_point, node, inst);
 			exit(1);
 		}
 
 		if (inst_log1->next_size) {
 			next = inst_log1->next[0];
 		} else if (inst != nodes[node].inst_end) {
-			debug_print(DEBUG_MAIN, 1, "DST inst 0x%x, entry_point = 0x%x, node = 0x%x next failure. No inst_end!!! inst_end1 = 0x%x, inst_end2 = 0x%x\n",
+			debug_print(DEBUG_MAIN, 1, "ERROR: DST inst 0x%x, entry_point = 0x%x, node = 0x%x next failure. No inst_end!!! inst_end1 = 0x%x, inst_end2 = 0x%x\n",
 				inst, entry_point, node, nodes[node].inst_end, nodes[node - 1].inst_end);
 			exit(1);
 		}
+		debug_print(DEBUG_MAIN, 1, "END1\n");
 	} while (inst != nodes[node].inst_end);
 
-	debug_print(DEBUG_MAIN, 1, "End variable_id = 0x%x, 0x%x\n", variable_id, self->external_entry_points[entry_point].variable_id);
+	debug_print(DEBUG_MAIN, 1, "END variable_id = 0x%x, 0x%x\n", variable_id, self->external_entry_points[entry_point].variable_id);
 	return 0;
 }
 
@@ -3751,7 +3756,7 @@ int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_lo
 
 	debug_print(DEBUG_MAIN, 1, "label address2 = %p\n", label);
 	debug_print(DEBUG_MAIN, 1, "opcode = 0x%x\n", instruction->opcode);
-	debug_print(DEBUG_MAIN, 1, "assign_id_label_dst: value to log_to_label:inst = 0x%x:0x%x: 0x%x, 0x%x, 0x%"PRIx64", 0x%x, 0x%x, 0x%x, 0x%"PRIx64", 0x%"PRIx64"\n",
+	debug_print(DEBUG_MAIN, 1, "assign_id_label_dst: value to log_to_label:entry_point = 0x%x, inst = 0x%x,dstA:store 0x%x, indirect 0x%x, index 0x%"PRIx64", value_size 0x%x, relocated 0x%x, value3:value_scope 0x%x, value_id 0x%"PRIx64", indirect_offset_value 0x%"PRIx64"\n",
 		function,
 		n,
 		instruction->dstA.store,

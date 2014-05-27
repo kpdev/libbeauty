@@ -870,6 +870,8 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 			inst->value1.ref_log;
 		/* Note: value_scope stays from the dst, not the src. */
 		/* FIXME Maybe Exception is the MOV instruction */
+		debug_print(DEBUG_EXE, 1, "MOV EXE value_scope: 1 = 0x%x, 3 = 0x%x\n",
+			inst->value1.value_scope, inst->value3.value_scope);
 		inst->value3.value_scope = inst->value1.value_scope;
 		/* MOV param to local */
 		/* When the destination is a param_reg,

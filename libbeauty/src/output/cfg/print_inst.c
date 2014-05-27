@@ -376,6 +376,7 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 	case JMPT:
 		if (instruction->srcA.indirect) {
 			debug_print(DEBUG_OUTPUT, 1, "JMPT 0x%x 0x%x 0x%x\n", instruction->srcA.indirect, instruction->srcA.store, instruction->srcA.value_size);
+			/* FIXME: This processing should not be in an output function. It should be in the EXE function. */
 			if (instruction->srcA.indirect > 4) {
 				instruction->srcA.indirect = 0;
 			}
@@ -426,6 +427,7 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 		ret = 0;
 		break;
 	case CALL:
+		/* FIXME: This processing should not be in an output function. It should be in the EXE function. */
 		if (instruction->srcA.relocated == 2) {
 			for (n = 0; n < EXTERNAL_ENTRY_POINTS_MAX; n++) {
 				if ((external_entry_points[n].valid != 0) &&
