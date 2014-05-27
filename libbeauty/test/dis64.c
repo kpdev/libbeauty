@@ -1541,7 +1541,7 @@ int assign_labels_to_dst(struct self_s *self, int entry_point, int node)
 		debug_print(DEBUG_MAIN, 1, "START1 entry_point = 0x%x, node = 0x%x, inst = 0x%x, variable_id = 0x%x\n",
 			entry_point, node, inst, variable_id);
 		debug_print(DEBUG_MAIN, 1, "label address = %p\n", &label);
-		tmp  = assign_id_label_dst(self, entry_point, node, inst_log1, &label);
+		tmp  = assign_id_label_dst(self, entry_point, inst, inst_log1, &label);
 #if 0
 		debug_print(DEBUG_MAIN, 1, "value to log_to_label:inst = 0x%x: 0x%x, 0x%"PRIx64", 0x%x, 0x%x, 0x%"PRIx64", 0x%"PRIx64"\n",
 			inst,
@@ -3752,7 +3752,7 @@ int create_function_node_members(struct self_s *self, struct external_entry_poin
 	return 0;
 }
 
-int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_log_entry_s *inst_log1, struct label_s *label)
+int assign_id_label_dst(struct self_s *self, int function, int inst, struct inst_log_entry_s *inst_log1, struct label_s *label)
 {
 	/* returns 0 for id and label set. 1 for error */
 	int ret = 1;
@@ -3768,7 +3768,7 @@ int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_lo
 	debug_print(DEBUG_MAIN, 1, "opcode = 0x%x\n", instruction->opcode);
 	debug_print(DEBUG_MAIN, 1, "assign_id_label_dst: value to log_to_label:entry_point = 0x%x, inst = 0x%x,dstA:store 0x%x, indirect 0x%x, index 0x%"PRIx64", value_size 0x%x, relocated 0x%x, value3:value_scope 0x%x, value_id 0x%"PRIx64", indirect_offset_value 0x%"PRIx64"\n",
 		function,
-		n,
+		inst,
 		instruction->dstA.store,
 		instruction->dstA.indirect,
 		instruction->dstA.index,
@@ -3823,7 +3823,7 @@ int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_lo
 				inst_log1->value2.value_scope,
 				inst_log1->value3.value_scope);
 			if (ret) {
-				debug_print(DEBUG_MAIN, 1, "Inst:0x%x, value3 unknown label\n", n);
+				debug_print(DEBUG_MAIN, 1, "Inst:0x%x, value3 unknown label\n", inst);
 				debug_print(DEBUG_MAIN, 1, "value1 scope 0x%x, value2 scope 0x%x, value3 scope 0x%x\n",
 					inst_log1->value1.value_scope,
 					inst_log1->value2.value_scope,
@@ -3937,7 +3937,7 @@ int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_lo
 		break;
 
 	case CALL:
-		debug_print(DEBUG_MAIN, 1, "SSA CALL inst_log 0x%x\n", n);
+		debug_print(DEBUG_MAIN, 1, "SSA CALL inst_log 0x%x\n", inst);
 		if (IND_DIRECT == instruction->dstA.indirect) {
 			inst_log1->value3.value_id = variable_id;
 		} else {
@@ -3956,7 +3956,7 @@ int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_lo
 			inst_log1->value3.indirect_offset_value,
 			label);
 		if (ret) {
-			debug_print(DEBUG_MAIN, 1, "Inst:0x%x, value3 unknown label\n", n);
+			debug_print(DEBUG_MAIN, 1, "Inst:0x%x, value3 unknown label\n", inst);
 		}
 		break;
 	case IF:
@@ -3968,7 +3968,7 @@ int assign_id_label_dst(struct self_s *self, int function, int n, struct inst_lo
 		ret = 0;
 		break;
 	default:
-		debug_print(DEBUG_MAIN, 1, "SSA1 failed for Inst:0x%x, OP 0x%x\n", n, instruction->opcode);
+		debug_print(DEBUG_MAIN, 1, "SSA1 failed for Inst:0x%x, OP 0x%x\n", inst, instruction->opcode);
 		ret = 1;
 		break;
 	}
