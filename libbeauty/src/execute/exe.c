@@ -542,7 +542,7 @@ static int put_value_RTL_instruction(
 			}
 			/* FIXME what to do in NULL */
 			if (!value) {
-				debug_print(DEBUG_EXE, 1, "WHY!!!!!\n");
+				debug_print(DEBUG_EXE, 1, "Reg 0x%lx not found, Adding new store\n", instruction->dstA.index);
 				value = add_new_store(memory_reg,
 						instruction->dstA.index,
 						instruction->dstA.value_size);
@@ -576,6 +576,7 @@ static int put_value_RTL_instruction(
 			if (value->start_address != inst->value3.start_address) {
 				debug_print(DEBUG_EXE, 1, "STORE failure2\n");
 				result = 1;
+				exit(1);
 				goto exit_put_value;
 				break;
 			}
@@ -882,6 +883,10 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 			(STORE_DIRECT == instruction->srcA.store) &&
 			(0 == instruction->dstA.indirect)) {
 			inst->value3.value_scope = 2;
+		}
+		if (inst->value3.value_scope == 0) {
+			debug_print(DEBUG_EXE, 1, "ERROR: MOV value_scope == 0, BAD\n");
+			exit(1);
 		}
 		/* Counter */
 		//if (inst->value3.value_scope == 2) {
@@ -1840,10 +1845,11 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 			}
 		}
  
-		/* FIXME: Currently this is a NOP. */
+		/* FIXME: Currently this is a NOP. Need lenght to come from entry_point */
 		/* Get value of dstA */
-		inst->value3.start_address = 0;
-		inst->value3.length = 0;
+		inst->value3.start_address = 8;
+		/* FIXME: get length from entry_point */
+		inst->value3.length = 8;
 		inst->value3.init_value_type = 0;
 		inst->value3.init_value = 0;
 		inst->value3.offset_value = 0;
@@ -1875,6 +1881,16 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 	default:
 		debug_print(DEBUG_EXE, 1, "Unhandled EXE intruction 0x%x\n", instruction->opcode);
 		ret = 1;
+		break;
+	}
+	switch (instruction->opcode) {
+	case NOP:
+		break;
+	default: 
+		if (inst->value3.value_scope == 0) {
+			debug_print(DEBUG_EXE, 1, "ERROR: value_scope == 0, BAD\n");
+			exit(1);
+		}
 		break;
 	}
 	return ret;
