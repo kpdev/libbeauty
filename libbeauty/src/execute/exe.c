@@ -783,12 +783,6 @@ exit_put_value:
 	return result;
 }
 
-
-
-
-
-
-
 int execute_instruction(struct self_s *self, struct process_state_s *process_state, struct inst_log_entry_s *inst)
 {
 	struct instruction_s *instruction;
@@ -804,6 +798,7 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 	int64_t tmp64s;
 	uint64_t tmp64u;
 	int tmp;
+	int n;
 
 	//memory_text = process_state->memory_text;
 	//memory_stack = process_state->memory_stack;
@@ -1818,6 +1813,32 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		/* Make init_value +  offset_value = abs value */
 		inst->value1.offset_value = inst->value1.init_value;
 		inst->value1.init_value = value->offset_value;
+
+		/* Link the call destination to a valid external_entry_point if possible */
+		if ((instruction->srcA.relocated == 0) &&
+			(instruction->srcA.indirect == IND_DIRECT)) {
+			debug_print(DEBUG_OUTPUT, 1, "CALL: SCANNING for call_offset\n");
+			for (n = 0; n < EXTERNAL_ENTRY_POINTS_MAX; n++) {
+				struct external_entry_point_s *external_entry_points = self->external_entry_points;
+				uint64_t call_offset = inst->value1.init_value + inst->value1.offset_value;
+				if ((external_entry_points[n].valid != 0) &&
+					(external_entry_points[n].type == 1) &&
+					(external_entry_points[n].value == call_offset)) {
+					debug_print(DEBUG_OUTPUT, 1, "found call_offset entry_point = 0x%x\n", n);
+					instruction->srcA.index = n;
+					instruction->srcA.relocated = 1;
+					break;
+				}
+				if ((external_entry_points[n].valid != 0) &&
+					(external_entry_points[n].type == 2) &&
+					(external_entry_points[n].value == call_offset)) {
+					debug_print(DEBUG_OUTPUT, 1, "found call_offset entry_point = 0x%x\n", n);
+					instruction->srcA.index = n;
+					instruction->srcA.relocated = 1;
+					break;
+				}
+			}
+		}
  
 		/* FIXME: Currently this is a NOP. */
 		/* Get value of dstA */
