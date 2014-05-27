@@ -263,7 +263,8 @@ struct external_entry_point_s {
 	/* param types are stored in the label */
 	int params_size;
 	int *params;
-	int *params_order;
+	/* reg_params_size holds the number of register params as per reg_params_order[] */ 
+	int reg_params_size;
 	int param_reg_label[MAX_REG];
 	int locals_size;
 	int *locals;

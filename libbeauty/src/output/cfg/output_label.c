@@ -334,6 +334,10 @@ int if_expression( int condition, struct inst_log_entry_s *inst_log1_flagged,
 		case IND_DIRECT:
 			value_id = inst_log1_flagged->value2.value_id;
 			break;
+		default:
+			debug_print(DEBUG_OUTPUT, 1, "ERROR invalid srcB.indirect 0x%x\n",inst_log1_flagged->instruction.srcB.indirect);
+			exit(1);
+			break;
 		}
 		if (STORE_DIRECT == inst_log1_flagged->instruction.srcB.store) {
 			tmp = dprintf(fd, "0x%"PRIx64, inst_log1_flagged->instruction.srcB.index);
@@ -563,6 +567,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
 	struct external_entry_point_s *external_entry_points = self->external_entry_points;
 	struct label_s *label;
+	struct extension_call_s *call;
 	char buffer[1024];
 	struct string_s string1;
 	string1.len = 0;
@@ -745,6 +750,10 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 				break;
 			case IND_DIRECT:
 				value_id = inst_log1->value3.value_id;
+				break;
+			default:
+				debug_print(DEBUG_OUTPUT, 1, "ERROR invalid dstA.indirect 0x%x\n", instruction->dstA.indirect);
+				exit(1);
 				break;
 			}
 			tmp = label_redirect[value_id].redirect;
@@ -1101,7 +1110,6 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 				/* A direct call */
 				/* FIXME: Get the output right */
 				if (1 == instruction->srcA.relocated && inst_log1->extension) {
-					struct extension_call_s *call;
 					call = inst_log1->extension;
 					if (!call) {
 						printf("call is NULL\n");
@@ -1162,7 +1170,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 				} else {
 					tmp = dprintf(fd, "CALL1()%s", cr);
 				}
-#if 0
+#if 1
 				/* FIXME: JCD test disabled */
 				call = inst_log1->extension;
 				if (call) {
@@ -1171,11 +1179,12 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 							dprintf(fd, ", ");
 						}
 						label = &labels[call->params[l]];
-						tmp = output_label(label, fd);
+						tmp = label_to_string(label, buffer, 1023);
+						tmp = dprintf(fd, "%s", buffer);
 					}
 				}
 #endif
-				//tmp = dprintf(fd, ");\n");
+				tmp = dprintf(fd, ");\n");
 				//debug_print(DEBUG_OUTPUT, 1, "%s();\n",
 				//	external_entry_points[instruction->srcA.index].name);
 			} else {

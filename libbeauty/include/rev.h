@@ -71,6 +71,7 @@ extern void dbg_print(const char* func, int line, int module, int level, const c
 #define REG_PARAMS_ORDER_MAX 8
 /* RSP, RBP, RDI, RSI, RDX, RCX, R08, R09  */
 extern int reg_params_order[];
+extern int reg_params_order_size;
 
 struct extension_call_s {
 	int params_size;

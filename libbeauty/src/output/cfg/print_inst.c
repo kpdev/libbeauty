@@ -38,6 +38,8 @@ int reg_params_order[] = {
         REG_09 /* R09 */
 };
 
+int reg_params_order_size = sizeof(reg_params_order) / sizeof(int);
+
 const char * opcode_table[] = {
 	"NONE",   // 0x00
 	"MOV",   // 0x01
