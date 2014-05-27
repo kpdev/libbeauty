@@ -4901,7 +4901,7 @@ int main(int argc, char *argv[])
 				}
 				tmp = assign_labels_to_dst(self, l, n);
 				if (tmp) {
-					printf("assign_labels_to_src() failed\n");
+					printf("assign_labels_to_dst() failed\n");
 					exit(1);
 				}
 			}
