@@ -523,6 +523,8 @@ int external_entry_points_init(struct external_entry_point_s *external_entry_poi
 	tmp = external_entry_points_init_bfl(external_entry_points, handle_void);
 	for (n = 0; n < EXTERNAL_ENTRY_POINTS_MAX; n++) {
 		if (external_entry_points[n].valid != 0) {
+			debug_print(DEBUG_MAIN, 1, "init external entry point 0x%x\n",
+				n);
 			external_entry_points[n].process_state.memory_text =
 				calloc(MEMORY_TEXT_SIZE, sizeof(struct memory_s));
 			external_entry_points[n].process_state.memory_stack =
@@ -548,7 +550,7 @@ int external_entry_points_init(struct external_entry_point_s *external_entry_poi
 
 			print_mem(memory_reg, 1);
 			external_entry_points[n].params_reg_ordered =
-				calloc(reg_params_order_size, sizeof(int));
+				calloc(REG_PARAMS_ORDER_MAX, sizeof(int));
 		}
 	}
 	return tmp;
@@ -5689,46 +5691,34 @@ int main(int argc, char *argv[])
 #endif				
 	
 	/***************************************************
-	 * This section sorts the external entry point params to the correct order
+	 * This section takes the external entry point params and orders them into params_reg_ordered
 	 ***************************************************/
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
-		for (m = 0; m < REG_PARAMS_ORDER_MAX; m++) {
+		debug_print(DEBUG_MAIN, 1, "JCD5: entry point params processing 0x%x\n", l);
+		if (external_entry_points[l].valid) {
+			debug_print(DEBUG_MAIN, 1, "JCD5: entry point valid 0x%x\n", l);
+			for (m = 0; m < REG_PARAMS_ORDER_MAX; m++) {
 			struct label_s *label;
-			for (n = 0; n < external_entry_points[l].params_size; n++) {
-				uint64_t tmp_param;
-				tmp = external_entry_points[l].params[n];
-				debug_print(DEBUG_MAIN, 1, "JCD5: labels 0x%x, params_size=%d\n", tmp, external_entry_points[l].params_size);
-				if (tmp >= external_entry_points[l].variable_id) {
-					debug_print(DEBUG_MAIN, 1, "Invalid entry point 0x%x, l=%d, m=%d, n=%d, params_size=%d\n",
-						tmp, l, m, n, external_entry_points[l].params_size);
-					return 0;
-				}
-				label = &(external_entry_points[l].labels[tmp]);
-				debug_print(DEBUG_MAIN, 1, "JCD5: labels 0x%x\n", external_entry_points[l].params[n]);
-				debug_print(DEBUG_MAIN, 1, "JCD5: label=%p, l=%d, m=%d, n=%d\n", label, l, m, n);
-				debug_print(DEBUG_MAIN, 1, "reg_params_order = 0x%x,", reg_params_order[m]);
-				debug_print(DEBUG_MAIN, 1, " label->value = 0x%"PRIx64"\n", label->value);
-				if ((label->scope == 2) &&
-					(label->type == 1) &&
-					(label->value == reg_params_order[m])) {
-					/* Swap params */
-					/* FIXME: How to handle the case of params_size <= n or m */
-					if (n != m) {
-						debug_print(DEBUG_MAIN, 1, "JCD4: swapping n=0x%x and m=0x%x\n", n, m);
-						tmp = external_entry_points[l].params_size;
-						if ((m >= tmp || n >= tmp)) { 
-							external_entry_points[l].params_size++;
-							external_entry_points[l].params =
-								realloc(external_entry_points[l].params, external_entry_points[l].params_size * sizeof(int));
-							/* FIXME: Need to get label right */
-							external_entry_points[l].params[external_entry_points[l].params_size - 1] =
-								external_entry_points[l].variable_id;
-							external_entry_points[l].variable_id++;
-						}
-						tmp_param = external_entry_points[l].params[n];
-						external_entry_points[l].params[n] =
-							external_entry_points[l].params[m];
-						external_entry_points[l].params[m] = tmp_param;
+				for (n = 0; n < external_entry_points[l].params_size; n++) {
+					uint64_t tmp_param;
+					tmp_param = external_entry_points[l].params[n];
+					debug_print(DEBUG_MAIN, 1, "JCD5: labels 0x%x, params_size=%d\n", tmp_param, external_entry_points[l].params_size);
+					/* Sanity check */
+					if (tmp_param >= external_entry_points[l].variable_id) {
+						debug_print(DEBUG_MAIN, 1, "Invalid entry point 0x%x, l=%d, m=%d, n=%d, params_size=%d\n",
+							tmp, l, m, n, external_entry_points[l].params_size);
+						return 1;
+					}
+					label = &(external_entry_points[l].labels[tmp_param]);
+					debug_print(DEBUG_MAIN, 1, "JCD5: labels 0x%x\n", external_entry_points[l].params[n]);
+					debug_print(DEBUG_MAIN, 1, "JCD5: label=%p, l=%d, m=%d, n=%d\n", label, l, m, n);
+					debug_print(DEBUG_MAIN, 1, "reg_params_order = 0x%x,", reg_params_order[m]);
+					debug_print(DEBUG_MAIN, 1, " label->value = 0x%"PRIx64"\n", label->value);
+					if ((label->scope == 2) &&
+						(label->type == 1) &&
+						(label->value == reg_params_order[m])) {
+						external_entry_points[l].params_reg_ordered[m] = tmp_param;
+						external_entry_points[l].params_reg_ordered_size = m + 1;
 					}
 				}
 			}
@@ -6068,29 +6058,28 @@ int main(int argc, char *argv[])
 			}
 			output_function_name(fd, &external_entry_points[l]);
 			tmp_state = 0;
-			for (m = 0; m < REG_PARAMS_ORDER_MAX; m++) {
+			/* Output param_reg */
+			for (n = 0; n < external_entry_points[l].params_reg_ordered_size; n++) {
 				struct label_s *label;
 				char buffer[1024];
-				for (n = 0; n < external_entry_points[l].params_size; n++) {
-					label = &(external_entry_points[l].labels[external_entry_points[l].params[n]]);
-					debug_print(DEBUG_MAIN, 1, "reg_params_order = 0x%x, label->value = 0x%"PRIx64"\n", reg_params_order[m], label->value);
-					if ((label->scope == 2) &&
-						(label->type == 1) &&
-						(label->value == reg_params_order[m])) {
-						if (tmp_state > 0) {
-							dprintf(fd, ", ");
-						}
-						dprintf(fd, "int%"PRId64"_t ",
-							label->size_bits);
-						if (label->lab_pointer) {
-							dprintf(fd, "*");
-						}
-						tmp = label_to_string(label, buffer, 1023);
-						dprintf(fd, "%s", buffer);
-						tmp_state++;
+				label = &(external_entry_points[l].labels[external_entry_points[l].params_reg_ordered[n]]);
+				debug_print(DEBUG_MAIN, 1, "reg_params_order = 0x%x, label->value = 0x%"PRIx64"\n", reg_params_order[n], label->value);
+				if ((label->scope == 2) &&
+					(label->type == 1)) {
+					if (tmp_state > 0) {
+						dprintf(fd, ", ");
 					}
+					dprintf(fd, "int%"PRId64"_t ",
+						label->size_bits);
+					if (label->lab_pointer) {
+						dprintf(fd, "*");
+					}
+					tmp = label_to_string(label, buffer, 1023);
+					dprintf(fd, "%s", buffer);
+					tmp_state++;
 				}
 			}
+			/* Output param_stack */
 			for (n = 0; n < external_entry_points[l].params_size; n++) {
 				struct label_s *label;
 				char buffer[1024];
