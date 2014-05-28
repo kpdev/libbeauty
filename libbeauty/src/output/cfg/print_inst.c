@@ -444,47 +444,52 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 		}
 		if ((instruction->srcA.indirect == IND_DIRECT) &&
 			(instruction->srcA.relocated == 1)) {
-				tmp = snprintf(buffer, 1023, " CALL2 0x%"PRIx64":%s(",
-					instruction->srcA.index,
-					external_entry_points[instruction->srcA.index].name);
-			
+			tmp = snprintf(buffer, 1023, " CALL2 0x%"PRIx64":%s(",
+				instruction->srcA.index,
+				external_entry_points[instruction->srcA.index].name);
 			tmp = string_cat(string, buffer, strlen(buffer));
 			tmp_state = 0;
 			l = instruction->srcA.index;
-			for (n = 0; n < external_entry_points[l].params_size; n++) {
+			for (n = 0; n < external_entry_points[l].reg_params_size; n++) {
 				struct label_s *label;
-				label = &labels[external_entry_points[l].params[n]];
+				label = &labels[external_entry_points[l].param_reg_label[reg_params_order[n]]];
 				debug_print(DEBUG_OUTPUT, 1, "reg_params_order = 0x%x, label->value = 0x%"PRIx64"\n", reg_params_order[n], label->value);
 				if ((label->scope == 2) &&
 					(label->type == 1)) {
 					if (tmp_state > 0) {
 						snprintf(buffer, 1023, ", ");
+						tmp = string_cat(string, buffer, strlen(buffer));
 					}
 					snprintf(buffer, 1023, "int%"PRId64"_t ",
 						label->size_bits);
+					tmp = string_cat(string, buffer, strlen(buffer));
 					tmp = label_to_string(label, buffer, 1023);
-					tmp = snprintf(buffer, 1023, "%s", buffer);
+					//tmp = snprintf(buffer, 1023, "%s", buffer);
+					tmp = string_cat(string, buffer, strlen(buffer));
 					tmp_state++;
 				}
 			}
-			for (n = 0; n < external_entry_points[l].params_size; n++) {
+			for (n = 0; n < external_entry_points[l].reg_params_size; n++) {
 				struct label_s *label;
-				label = &labels[external_entry_points[l].params[n]];
+				label = &labels[external_entry_points[l].param_reg_label[reg_params_order[n]]];
 				if ((label->scope == 2) &&
 					(label->type == 1)) {
 					continue;
 				}
 				if (tmp_state > 0) {
 					snprintf(buffer, 1023, ", ");
+					tmp = string_cat(string, buffer, strlen(buffer));
 				}
 				snprintf(buffer, 1023, "int%"PRId64"_t ",
 					label->size_bits);
 				tmp = string_cat(string, buffer, strlen(buffer));
 				tmp = label_to_string(label, buffer, 1023);
-				tmp = snprintf(buffer, 1023, "%s", buffer);
+				//tmp = snprintf(buffer, 1023, "%s", buffer);
+				tmp = string_cat(string, buffer, strlen(buffer));
 				tmp_state++;
 			}
 			tmp = snprintf(buffer, 1023, ");");
+			tmp = string_cat(string, buffer, strlen(buffer));
 		} else if (instruction->srcA.indirect == IND_MEM) {
 			tmp = snprintf(buffer, 1023, "(*r0x%"PRIx64") ();", 
 				instruction->srcA.index);

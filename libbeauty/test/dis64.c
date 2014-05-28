@@ -1605,6 +1605,7 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 	int variable_id = external_entry_point->variable_id;
 	uint64_t stack_address;
 	struct memory_s *memory;
+	struct extension_call_s *call;
 
 	/* n is the node to process */
 	int inst;
@@ -2318,6 +2319,15 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 			break;
 		case CALL:
 			/* FIXME: TODO. Handle the params passed */
+			/* Store reg_tracker state in CALL info, for use later.
+			 * This is so forward references to as yet unprocessed functions
+			 * are handled correctly.
+			 */
+			inst_log1->extension = calloc(1, sizeof(struct extension_call_s));
+			call = inst_log1->extension;
+			for (m = 0; m < MAX_REG; m++) {
+				call->reg_tracker[m] = reg_tracker[m];
+			}
 			/* Used to update the reg_tracker while stepping through the assign src */
 			switch (instruction->dstA.store) {
 			case STORE_DIRECT:
@@ -4120,6 +4130,88 @@ int dump_labels_table(struct self_s *self, char *buffer)
 	return 0;
 }
 
+int call_params_to_locals(struct self_s *self, int entry_point, int node)
+{
+	struct external_entry_point_s *external_entry_points = self->external_entry_points;
+	struct external_entry_point_s *external_entry_point = &(external_entry_points[entry_point]);
+	struct external_entry_point_s *external_entry_point_callee;
+	struct control_flow_node_s *nodes = external_entry_point->nodes;
+	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
+	struct label_redirect_s *label_redirect = external_entry_point->label_redirect;
+	struct label_s *labels = external_entry_point->labels;
+	struct label_s *labels_callee;
+	int m;
+	struct inst_log_entry_s *inst_log1;
+	struct instruction_s *instruction;
+	uint64_t stack_address;
+	struct memory_s *memory;
+	struct extension_call_s *call;
+
+	int inst;
+	struct label_s *label;
+	int found = 0;
+	debug_print(DEBUG_MAIN, 1, "PARAMS: entry_point = 0x%x, node = 0x%x\n", entry_point, node);
+
+	inst = nodes[node].inst_start;
+	do {
+		inst_log1 =  &inst_log_entry[inst];
+		instruction =  &inst_log1->instruction;
+		switch (instruction->opcode) {
+		case CALL:
+			//debug_print(DEBUG_MAIN, 1, "PRINTING INST CALL\n");
+			//tmp = print_inst(self, instruction, n, labels);
+			if (instruction->srcA.relocated != 1) {
+				break;
+			}
+			external_entry_point_callee = &external_entry_points[instruction->srcA.index];
+			labels_callee = external_entry_point_callee->labels;
+			call = inst_log1->extension;
+			call->params_size = external_entry_point_callee->params_reg_ordered_size;
+			/* FIXME: use struct in sizeof bit here */
+			call->params = calloc(call->params_size, sizeof(int *));
+			if (!call) {
+				debug_print(DEBUG_MAIN, 1, "ERROR: PARAM failed for inst:0x%x, CALL. Out of memory\n", inst);
+				return 1;
+			}
+			debug_print(DEBUG_MAIN, 1, "PARAM:call size=%x\n", call->params_size);
+			for (m = 0; m < call->params_size; m++) {
+				label = &labels_callee[external_entry_point_callee->params_reg_ordered[m]];
+				/* param_regXXX */
+				if ((2 == label->scope) &&
+					(1 == label->type)) {
+					call->params[m] = call->reg_tracker[label->value];
+					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params[m]);
+				} else {
+					/* param_stackXXX */
+					/* SP value held in value1 */
+					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value1.init_value, inst_log1->value1.offset_value, label->value);
+					//tmp = search_back_local_reg_stack(self, mid_start_size, mid_start, 2, inst_log1->value1.init_value, inst_log1->value1.offset_value + label->value - 8, &size, self->search_back_seen, &inst_list);
+				}
+				//tmp = output_label(label, stdout);
+				//tmp = dprintf(stdout, ");\n");
+				//tmp = dprintf(stdout, "PARAM size = 0x%"PRIx64"\n", size);
+			}
+			break;
+
+		default:
+			break;
+		}
+		if (inst == nodes[node].inst_end) {
+			found = 1;
+		}
+		if (inst_log1->next_size > 0) {
+			inst = inst_log1->next[0];
+		} else {
+			/* Exit here */
+			found = 1;
+		}
+	} while (!found);
+
+	return 0;
+}
+
+
+
 int main(int argc, char *argv[])
 {
 	int n = 0;
@@ -5694,7 +5786,6 @@ int main(int argc, char *argv[])
 	 * This section takes the external entry point params and orders them into params_reg_ordered
 	 ***************************************************/
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
-		debug_print(DEBUG_MAIN, 1, "JCD5: entry point params processing 0x%x\n", l);
 		if (external_entry_points[l].valid) {
 			debug_print(DEBUG_MAIN, 1, "JCD5: entry point valid 0x%x\n", l);
 			for (m = 0; m < REG_PARAMS_ORDER_MAX; m++) {
@@ -5734,114 +5825,21 @@ int main(int argc, char *argv[])
 	 * e.g. Change local0011 = function(param_reg0040);
 	 *      to     local0011 = function(local0009);
 	 ***************************************************/
-// FIXME: Working on this
-#if 0
-	for (n = 1; n < inst_log; n++) {
-		struct label_s *label;
-		uint64_t value_id1;
-		uint64_t size;
-		uint64_t *inst_list;
-		struct extension_call_s *call;
-		struct external_entry_point_s *external_entry_point;
-		uint64_t mid_start_size;
-		struct mid_start_s *mid_start;
-
-		size = 0;
-		inst_log1 =  &inst_log_entry[n];
-		instruction =  &inst_log1->instruction;
-		value_id1 = inst_log1->value1.value_id;
-
-		if (value_id1 > self->local_counter) {
-			debug_print(DEBUG_MAIN, 1, "PARAM Failed at inst_log 0x%x\n", n);
-			return 1;
-		}
-		switch (instruction->opcode) {
-		case CALL:
-			debug_print(DEBUG_MAIN, 1, "PRINTING INST CALL\n");
-			tmp = print_inst(self, instruction, n, labels);
-			external_entry_point = &external_entry_points[instruction->srcA.index];
-			inst_log1->extension = calloc(1, sizeof(struct extension_call_s));
-			call = inst_log1->extension;
-			call->params_size = external_entry_point->params_size;
-			/* FIXME: use struct in sizeof bit here */
-			call->params = calloc(call->params_size, sizeof(int *));
-			if (!call) {
-				debug_print(DEBUG_MAIN, 1, "PARAM failed for inst:0x%x, CALL. Out of memory\n", n);
-				return 1;
-			}
-			debug_print(DEBUG_MAIN, 1, "PARAM:call size=%x\n", call->params_size);
-			debug_print(DEBUG_MAIN, 1, "PARAM:params size=%x\n", external_entry_point->params_size);
-			for (m = 0; m < external_entry_point->params_size; m++) {
-				label = &labels[external_entry_point->params[m]];
-				if (0 == inst_log1->prev_size) {
-					debug_print(DEBUG_MAIN, 1, "search_back ended\n");
-					return 1;
+	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
+			for(n = 1; n < external_entry_points[l].nodes_size; n++) {
+				if (!external_entry_points[l].nodes[n].valid) {
+					/* Only output nodes that are valid */
+					continue;
 				}
-				if (0 < inst_log1->prev_size) {
-					mid_start = calloc(inst_log1->prev_size, sizeof(struct mid_start_s));
-					mid_start_size = inst_log1->prev_size;
-					for (l = 0; l < inst_log1->prev_size; l++) {
-						mid_start[l].mid_start = inst_log1->prev[l];
-						mid_start[l].valid = 1;
-						debug_print(DEBUG_MAIN, 1, "mid_start added 0x%"PRIx64" at 0x%x\n", mid_start[l].mid_start, l);
-					}
-				}
-				/* param_regXXX */
-				if ((2 == label->scope) &&
-					(1 == label->type)) {
-					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for REG0x%"PRIx64":0x%"PRIx64" + label->value(0x%"PRIx64")\n", inst_log1->value1.init_value, inst_log1->value1.offset_value, label->value);
-					tmp = search_back_local_reg_stack(self, mid_start_size, mid_start, 1, label->value, 0, &size, self->search_back_seen, &inst_list);
-					debug_print(DEBUG_MAIN, 1, "search_backJCD1: tmp = %d\n", tmp);
-				} else {
-				/* param_stackXXX */
-				/* SP value held in value1 */
-					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value1.init_value, inst_log1->value1.offset_value, label->value);
-					tmp = search_back_local_reg_stack(self, mid_start_size, mid_start, 2, inst_log1->value1.init_value, inst_log1->value1.offset_value + label->value - 8, &size, self->search_back_seen, &inst_list);
-				/* FIXME: Some renaming of local vars will also be needed if size > 1 */
-				}
+				tmp = call_params_to_locals(self, l, n);
 				if (tmp) {
-					debug_print(DEBUG_MAIN, 1, "PARAM search_back Failed at inst_log 0x%x\n", n);
-					return 1;
-				}
-				tmp = output_label(label, stdout);
-				tmp = dprintf(stdout, ");\n");
-				tmp = dprintf(stdout, "PARAM size = 0x%"PRIx64"\n", size);
-				if (size > 1) {
-					debug_print(DEBUG_MAIN, 1, "number of param locals (0x%"PRIx64") found too big at instruction 0x%x\n", size, n);
-//					return 1;
-//					break;
-				}
-				if (size > 0) {
-					for (l = 0; l < size; l++) {
-						struct inst_log_entry_s *inst_log_l;
-						inst_log_l = &inst_log_entry[inst_list[l]];
-						call->params[m] = inst_log_l->value3.value_id;
-						// FIXME: Check next line. Force value type to unknown.
-						debug_print(DEBUG_MAIN, 1, "JCD3: Setting value_type to 0, was 0x%x\n", inst_log_l->value3.value_type);
-						if (6 == inst_log_l->value3.value_type) {	
-							inst_log_l->value1.value_type = 3;
-							inst_log_l->value3.value_type = 3;
-						}
-						debug_print(DEBUG_MAIN, 1, "JCD1: Param = 0x%"PRIx64", inst_list[0x%x] = 0x%"PRIx64"\n",
-
-							inst_log_l->value3.value_id,
-							l,
-							inst_list[l]);
-						//tmp = label_redirect[inst_log_l->value3.value_id].redirect;
-						//label = &labels[tmp];
-						//tmp = output_label(label, stdout);
-					}
+					printf("call_params_to_locals failed\n");
+					exit(1);
 				}
 			}
-			//debug_print(DEBUG_MAIN, 1, "SSA2 failed for inst:0x%x, CALL\n", n);
-			//return 1;
-			break;
-
-		default:
-			break;
 		}
 	}
-#endif
 	/**************************************************
 	 * This section deals with variable types, scanning forwards
 	 * FIXME: Need to make this a little more intelligent

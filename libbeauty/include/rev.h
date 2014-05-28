@@ -74,6 +74,7 @@ extern int reg_params_order[];
 extern int reg_params_order_size;
 
 struct extension_call_s {
+	int reg_tracker[MAX_REG];
 	int params_size;
 	int *params;
 };

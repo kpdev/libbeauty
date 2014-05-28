@@ -1086,7 +1086,6 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 			tmp = dprintf(fd, ";%s",cr);
 			break;
 		case CALL:
-			/* FIXME: This does nothing at the moment. */
 			if (print_inst(self, instruction, inst_number, labels)) {
 				tmp = dprintf(fd, "exiting1\n");
 				return 1;
@@ -1112,13 +1111,9 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 				call = inst_log1->extension;
 				if (!call) {
 					printf("ERROR: call is NULL\n");
-					//exit(1);
+					exit(1);
 				}
 				if (1 == instruction->srcA.relocated && inst_log1->extension) {
-						
-					//tmp = dprintf(fd, "%s(%d:", 
-					//	external_entry_points[instruction->srcA.index].name,
-					//	external_entry_points[instruction->srcA.index].params_size);
 					if (STORE_DIRECT == instruction->srcA.store) {
 						tmp = dprintf(fd, "%s(", 
 							external_entry_points[instruction->srcA.index].name);
@@ -1136,20 +1131,15 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 						struct label_s *label;
 						tmp = label_redirect[call->params[n2]].redirect;
 						label = &labels[tmp];
-						//debug_print(DEBUG_OUTPUT, 1, "reg_params_order = 0x%x, label->value = 0x%"PRIx64"\n", reg_params_order[m], label->value);
-						//if ((label->scope == 2) &&
-						//	(label->type == 1)) {
 						if (tmp_state > 0) {
 							dprintf(fd, ", ");
 						}
-						//dprintf(fd, "int%"PRId64"_t ",
-						//	label->size_bits);
 						tmp = label_to_string(label, buffer, 1023);
 						tmp = dprintf(fd, "%s", buffer);
 						tmp_state++;
-					//	}
 					}
 #if 0
+					/* FIXME: Add support for param_stack */
 					for (n2 = 0; n2 < external_entry_points[l].params_size; n2++) {
 						struct label_s *label;
 						label = &labels[external_entry_points[l].params[n2]];
@@ -1161,7 +1151,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 							dprintf(fd, ", ");
 						}
 						dprintf(fd, "int%"PRId64"_t ",
-						label->size_bits);
+							label->size_bits);
 						tmp = output_label(label, fd);
 						tmp_state++;
 					}
@@ -1170,23 +1160,6 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 				} else {
 					tmp = dprintf(fd, "CALL1()%s", cr);
 				}
-#if 1
-				/* FIXME: JCD test disabled */
-				call = inst_log1->extension;
-				if (call) {
-					for (l = 0; l < call->params_size; l++) {
-						if (l > 0) {
-							dprintf(fd, ", ");
-						}
-						label = &labels[call->params[l]];
-						tmp = label_to_string(label, buffer, 1023);
-						tmp = dprintf(fd, "%s", buffer);
-					}
-				}
-#endif
-				tmp = dprintf(fd, ");\n");
-				//debug_print(DEBUG_OUTPUT, 1, "%s();\n",
-				//	external_entry_points[instruction->srcA.index].name);
 			} else {
 				/* A indirect call via a function pointer or call table. */
 				tmp = dprintf(fd, "(*");
@@ -1196,8 +1169,6 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 				tmp = dprintf(fd, "%s", buffer);
 				tmp = dprintf(fd, ") ()%s", cr);
 			}
-//			tmp = dprintf(fd, "/* call(); */\n");
-//			debug_print(DEBUG_OUTPUT, 1, "/* call(); */\n");
 			break;
 
 		case CMP:
