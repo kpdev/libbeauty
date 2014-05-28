@@ -547,6 +547,8 @@ int external_entry_points_init(struct external_entry_point_s *external_entry_poi
 			memory_reg[2].offset_value = external_entry_points[n].value;
 
 			print_mem(memory_reg, 1);
+			external_entry_points[n].params_reg_ordered =
+				calloc(reg_params_order_size, sizeof(int));
 		}
 	}
 	return tmp;
@@ -5029,8 +5031,6 @@ int main(int argc, char *argv[])
 			tmp = fill_phi_dst_size_from_src_size(self, l);
 		}
 	}
-	/* Enter value id/label id of param into phi with src node 0. */
-	/* TODO */
 
 	/* Assign labels to instructions src */
 	/* TODO: WIP: Work in progress */
