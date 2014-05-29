@@ -75,8 +75,14 @@ extern int reg_params_order_size;
 
 struct extension_call_s {
 	int reg_tracker[MAX_REG];
+	/* params passed by register */
 	int params_size;
 	int *params;
+	/* stack_offset at the call. Use to calculate the param_stack values */
+	uint64_t stack_offset;
+	/* params passed by stack */
+	int params_stack_size;
+	int *params_stack;
 };
 
 struct string_s {
