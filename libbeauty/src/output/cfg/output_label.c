@@ -1138,24 +1138,20 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 						tmp = dprintf(fd, "%s", buffer);
 						tmp_state++;
 					}
-#if 0
-					/* FIXME: Add support for param_stack */
-					for (n2 = 0; n2 < external_entry_points[l].params_size; n2++) {
-						struct label_s *label;
-						label = &labels[external_entry_points[l].params[n2]];
-						if ((label->scope == 2) &&
-							(label->type == 1)) {
-							continue;
-						}
+					for (n2 = 0; n2 < call->params_stack_size; n2++) {
+						uint64_t offset;
 						if (tmp_state > 0) {
 							dprintf(fd, ", ");
 						}
-						dprintf(fd, "int%"PRId64"_t ",
-							label->size_bits);
-						tmp = output_label(label, fd);
+						offset = call->params_stack[n2];
+						if (offset >= inst_log1->value2.offset_value) {
+							dprintf(fd, "param_stack%4"PRIx64,
+							inst_log1->value2.offset_value - offset);
+						} else {
+							dprintf(fd, "local_stack_EIP");
+						}
 						tmp_state++;
 					}
-#endif
 					tmp = dprintf(fd, ");%s", cr);
 				} else {
 					tmp = dprintf(fd, "CALL1()%s", cr);
