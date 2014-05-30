@@ -4181,10 +4181,18 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 					(1 == label->type)) {
 					call->params[m] = call->reg_tracker[label->value];
 					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params[m]);
+				}
+			}
+			for (m = 0; m < external_entry_point_callee->params_size; m++) {
+				label = &labels_callee[external_entry_point_callee->params[m]];
+				/* param_regXXX */
+				if ((2 == label->scope) &&
+					(1 == label->type)) {
+					/* Skip param_reg ones */
 				} else {
 					/* param_stackXXX */
-					/* SP value held in value1 */
-					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value1.init_value, inst_log1->value1.offset_value, label->value);
+					/* SP value held in value2 */
+					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value2.init_value, inst_log1->value2.offset_value, label->value);
 					//tmp = search_back_local_reg_stack(self, mid_start_size, mid_start, 2, inst_log1->value1.init_value, inst_log1->value1.offset_value + label->value - 8, &size, self->search_back_seen, &inst_list);
 				}
 				//tmp = output_label(label, stdout);
