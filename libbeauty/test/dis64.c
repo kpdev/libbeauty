@@ -4196,9 +4196,9 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value2.init_value, inst_log1->value2.offset_value, label->value);
 				}
 			}
-			params_stack_size = 0;
 			call->params_stack = calloc(params_stack_size, sizeof(uint64_t));
 			call->params_stack_size = params_stack_size;
+			params_stack_size = 0;
 			for (m = 0; m < external_entry_point_callee->params_size; m++) {
 				label = &labels_callee[external_entry_point_callee->params[m]];
 				/* param_regXXX */
