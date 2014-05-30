@@ -82,7 +82,7 @@ struct extension_call_s {
 	uint64_t stack_offset;
 	/* params passed by stack */
 	int params_stack_size;
-	int *params_stack;
+	uint64_t *params_stack;
 };
 
 struct string_s {

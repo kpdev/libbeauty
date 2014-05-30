@@ -4146,6 +4146,7 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 	uint64_t stack_address;
 	struct memory_s *memory;
 	struct extension_call_s *call;
+	int params_stack_size;
 
 	int inst;
 	struct label_s *label;
@@ -4183,21 +4184,32 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params[m]);
 				}
 			}
+			params_stack_size = 0;
 			for (m = 0; m < external_entry_point_callee->params_size; m++) {
 				label = &labels_callee[external_entry_point_callee->params[m]];
 				/* param_regXXX */
 				if ((2 == label->scope) &&
-					(1 == label->type)) {
-					/* Skip param_reg ones */
-				} else {
+					(2 == label->type)) {
+					params_stack_size++;
 					/* param_stackXXX */
 					/* SP value held in value2 */
 					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value2.init_value, inst_log1->value2.offset_value, label->value);
-					//tmp = search_back_local_reg_stack(self, mid_start_size, mid_start, 2, inst_log1->value1.init_value, inst_log1->value1.offset_value + label->value - 8, &size, self->search_back_seen, &inst_list);
 				}
-				//tmp = output_label(label, stdout);
-				//tmp = dprintf(stdout, ");\n");
-				//tmp = dprintf(stdout, "PARAM size = 0x%"PRIx64"\n", size);
+			}
+			params_stack_size = 0;
+			call->params_stack = calloc(params_stack_size, sizeof(uint64_t));
+			call->params_stack_size = params_stack_size;
+			for (m = 0; m < external_entry_point_callee->params_size; m++) {
+				label = &labels_callee[external_entry_point_callee->params[m]];
+				/* param_regXXX */
+				if ((2 == label->scope) &&
+					(2 == label->type)) {
+					/* param_stackXXX */
+					/* SP value held in value2 */
+					call->params_stack[params_stack_size] = inst_log1->value2.offset_value + label->value - 8;
+					debug_print(DEBUG_MAIN, 1, "PARAM: Found SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8, params_stack = 0x%lx\n", inst_log1->value2.init_value, inst_log1->value2.offset_value, label->value, call->params_stack[params_stack_size]);
+					params_stack_size++;
+				}
 			}
 			break;
 
