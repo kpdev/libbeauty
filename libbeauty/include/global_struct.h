@@ -426,6 +426,18 @@ struct instruction_s {
 	struct operand_s dstA; /* E.g. A */
 } ;
 
+struct extension_call_s {
+	int reg_tracker[MAX_REG];
+	/* params passed by register */
+	int params_size;
+	int *params;
+	/* stack_offset at the call. Use to calculate the param_stack values */
+	uint64_t stack_offset;
+	/* params passed by stack */
+	int params_stack_size;
+	uint64_t *params_stack;
+};
+
 struct inst_log_entry_s {
 	struct instruction_s instruction;	/* The instruction */
 	int prev_size;

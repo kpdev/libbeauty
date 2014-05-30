@@ -73,18 +73,6 @@ extern void dbg_print(const char* func, int line, int module, int level, const c
 extern int reg_params_order[];
 extern int reg_params_order_size;
 
-struct extension_call_s {
-	int reg_tracker[MAX_REG];
-	/* params passed by register */
-	int params_size;
-	int *params;
-	/* stack_offset at the call. Use to calculate the param_stack values */
-	uint64_t stack_offset;
-	/* params passed by stack */
-	int params_stack_size;
-	uint64_t *params_stack;
-};
-
 struct string_s {
 	char string[1024];
 	int len;
