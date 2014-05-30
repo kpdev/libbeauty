@@ -429,6 +429,7 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 		ret = 0;
 		break;
 	case CALL:
+#if 0
 		/* FIXME: This processing should not be in an output function. It should be in the EXE function. */
 		if (instruction->srcA.relocated == 2) {
 			for (n = 0; n < EXTERNAL_ENTRY_POINTS_MAX; n++) {
@@ -442,6 +443,7 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 				}
 			}
 		}
+#endif
 		if ((instruction->srcA.indirect == IND_DIRECT) &&
 			(instruction->srcA.relocated == 1)) {
 			tmp = snprintf(buffer, 1023, " CALL2 0x%"PRIx64":%s(",
