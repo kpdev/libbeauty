@@ -1800,16 +1800,18 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		/* FIXME */
 		/* On entry:
 		 * srcA = relative offset which is value 1.
+		 * srcB = ESP.
 		 * dstA is destination EAX register which is value 2.
 		 * with associated value1 and value2 
 		 * On exit we have need:
 		 * relative value coverted to ABS value.
 		 * value1 = value1.  // Value 1 is useful for function pointer calls. 
-		 * value3 = value2
 		 * value2 = ESP
+		 * value3 = value3
 		 */
 		/* Get value of srcA */
 		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcA), &(inst->value1), 0);
+		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcB), &(inst->value2), 1);
 		value = search_store(memory_reg,
 				REG_IP,
 				4);
@@ -1867,15 +1869,6 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		inst->value1.valid = 1;
 		inst->value3.valid = 1;
 		put_value_RTL_instruction(self, process_state, inst);
-		/* Once value3 is written, over write value1 with ESP */
-		/* Get the current ESP value so one can convert function params to locals */
-		operand.indirect = IND_DIRECT;
-		operand.store = STORE_REG;
-		operand.index = REG_SP;
-		/* Need to find out if the reg is 32bit or 64bit. Use the REG_AX return value size */
-		operand.value_size = instruction->dstA.value_size;
-
-		ret = get_value_RTL_instruction(self, process_state, &(operand), &(inst->value1), 1); 
 		break;
 
 	default:

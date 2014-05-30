@@ -756,7 +756,10 @@ int convert_ll_inst_to_rtl(struct self_s *self, struct instruction_low_level_s *
 		dis_instructions->instruction_number++;
 		result = 0;
 		break;
-	case CALL: /* non-relative */ 
+	case CALL: /* non-relative */
+		/* srcA = call target.
+		 * srcB = not set. Will be ESP later during execution step
+		 */
 		instruction = &dis_instructions->instruction[dis_instructions->instruction_number];	
 		instruction->opcode = CALL;
 		instruction->flags = 0;
@@ -771,11 +774,21 @@ int convert_ll_inst_to_rtl(struct self_s *self, struct instruction_low_level_s *
 		dis_instructions->instruction_number++;
 		result = 0;
 		break;
-	case CALLM: /* indirect */ 
+	case CALLM: /* indirect */
+		/* srcA = target
+		 * srcB = ESP
+		 * dstA = EAX
+		 */
 		ll_inst->opcode = CALL;
 		tmp  = convert_base(self, ll_inst, 0, dis_instructions);
 		result = tmp;
 		instruction = &dis_instructions->instruction[dis_instructions->instruction_number -  1];
+		instruction->srcB.store = STORE_REG;
+		instruction->srcB.indirect = IND_DIRECT;
+		instruction->srcB.indirect_size = 64;
+		instruction->srcB.index = REG_SP;
+		instruction->srcB.relocated = 0;
+		instruction->srcB.value_size = 64;
 		instruction->dstA.store = STORE_REG;
 		instruction->dstA.indirect = IND_DIRECT;
 		instruction->dstA.indirect_size = 64;
