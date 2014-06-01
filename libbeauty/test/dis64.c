@@ -5836,8 +5836,36 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
-
+	/***************************************************
+	 * This section takes the external entry point params and orders them into params_stack_ordered
+	 ***************************************************/
+	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+		if (external_entry_points[l].valid) {
+			int stack_size = 0;
+			struct label_s *label;
+			uint64_t tmp_param;
+			for (n = 0; n < external_entry_points[l].params_size; n++) {
+				tmp_param = external_entry_points[l].params[n];
+				label = &(external_entry_points[l].labels[tmp_param]);
+				if ((label->scope == 2) &&
+					(label->type == 2)) {
+					stack_size++;
+				}
+			}
+			external_entry_points[l].params_stack_ordered = calloc(stack_size, sizeof(int));
+			external_entry_points[l].params_stack_ordered_size = stack_size;
+			stack_size = 0;
+			for (n = 0; n < external_entry_points[l].params_size; n++) {
+				tmp_param = external_entry_points[l].params[n];
+				label = &(external_entry_points[l].labels[tmp_param]);
+				if ((label->scope == 2) &&
+					(label->type == 2)) {
+					external_entry_points[l].params_stack_ordered[stack_size] = tmp_param;
+					stack_size++;
+				}
+			}
+		}
+	}
 
 	/***************************************************
 	 * This section, PARAM, deals with converting
