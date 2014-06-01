@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <global_struct.h>
+
 #include <output.h>
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -88,6 +89,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, Value **va
 	int node_true;
 	int node_false;
 	int result = 0;
+	int n;
 
 	switch (inst_log1->instruction.opcode) {
 	case 1:  // MOV
@@ -288,6 +290,32 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, Value **va
 			BranchInst::Create(bb[node_true], bb[node]);
 			result = 1;
 		}
+		break;
+	case 0x12:  // CALL
+		printf("LLVM 0x%x: OPCODE = 0x%x:CALL\n", inst, inst_log1->instruction.opcode);
+		{
+			struct extension_call_s *call_info = static_cast<struct extension_call_s *> (inst_log1->extension);
+			std::vector<Value*> vector_params;
+			for (n = 0; n < call_info->params_size; n++) {
+				vector_params.push_back(value[call_info->params[n]]);
+			}
+			tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
+#if 0
+			CallInst* call_inst = CallInst::Create(func_test22a, vector_params, buffer, bb[node]);
+			call_inst->setCallingConv(CallingConv::C);
+			call_inst->setTailCall(false);
+			dstA = call_inst;
+			value[inst_log1->value3.value_id] = dstA;
+#endif
+		}
+		//std::vector<Value*> int32_25_params;
+		//int32_25_params.push_back(int32_23);
+		//int32_25_params.push_back(int32_24);
+		//CallInst* int32_25 = CallInst::Create(func_test22a, int32_25_params, "", label_18);
+		//int32_25->setCallingConv(CallingConv::C);
+		//int32_25->setTailCall(false);
+
+
 		break;
 	case 0x1e:  // RET
 		printf("LLVM 0x%x: OPCODE = 0x%x:RET\n", inst, inst_log1->instruction.opcode);
@@ -660,8 +688,8 @@ int LLVM_ir_export::output(struct self_s *self)
 			function_name = external_entry_points[n].name;
 			snprintf(output_filename, 500, "./llvm/%s.bc", function_name);
 			std::vector<Type*>FuncTy_0_args;
-			for (m = 0; m < external_entry_points[n].params_size; m++) {
-				index = external_entry_points[n].params[m];
+			for (m = 0; m < external_entry_points[n].params_reg_ordered_size; m++) {
+				index = external_entry_points[n].params_reg_ordered[m];
 				if (labels[index].lab_pointer > 0) {
 					int size = labels[index].pointer_type_size_bits;
 					printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
@@ -671,6 +699,25 @@ int LLVM_ir_export::output(struct self_s *self)
 					}
 					FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
 				} else {	
+					int size = labels[index].size_bits;
+					printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
+					FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
+				}
+			}
+			for (m = 0; m < external_entry_points[n].params_stack_ordered_size; m++) {
+				index = external_entry_points[n].params_stack_ordered[m];
+				if (index == 3) {
+				/* EIP or param_stack0000 */
+				}
+				if (labels[index].lab_pointer > 0) {
+					int size = labels[index].pointer_type_size_bits;
+					printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
+					if (size < 8) {
+						printf("FIXME: size too small\n");
+						size = 8;
+					}
+					FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
+				} else {
 					int size = labels[index].size_bits;
 					printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
 					FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
@@ -686,12 +733,20 @@ int LLVM_ir_export::output(struct self_s *self)
 
 			Function::arg_iterator args = F->arg_begin();
 			printf("Function: %s()  param_size = 0x%x\n", function_name, external_entry_points[n].params_size);
-			for (m = 0; m < external_entry_points[n].params_size; m++) {
-				index = external_entry_points[n].params[m];
+			for (m = 0; m < external_entry_points[n].params_reg_ordered_size; m++) {
+				index = external_entry_points[n].params_reg_ordered[m];
 				value[index] = args;
 				args++;
 				tmp = label_to_string(&(labels[index]), buffer, 1023);
-				printf("Adding param:%s:value index=0x%x\n", buffer, index);
+				printf("Adding reg param:%s:value index=0x%x\n", buffer, index);
+				value[index]->setName(buffer);
+			}
+			for (m = 0; m < external_entry_points[n].params_stack_ordered_size; m++) {
+				index = external_entry_points[n].params_stack_ordered[m];
+				value[index] = args;
+				args++;
+				tmp = label_to_string(&(labels[index]), buffer, 1023);
+				printf("Adding stack param:%s:value index=0x%x\n", buffer, index);
 				value[index]->setName(buffer);
 			}
 
