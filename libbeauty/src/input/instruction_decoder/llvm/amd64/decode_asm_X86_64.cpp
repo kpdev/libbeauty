@@ -34,7 +34,7 @@ int DecodeAsmOpInfoCallback(void *DisInfo, uint64_t PC,
                                   int TagType, void *TagBuf) {
 	struct dis_info_s *dis_info = (struct dis_info_s *) DisInfo;
 	llvm::MCInst *Inst = dis_info->Inst;
-	llvm::outs() << "DisInfo = " << DisInfo << "\n";
+//	llvm::outs() << "DisInfo = " << DisInfo << "\n";
 	int num_operands = Inst->getNumOperands();
 	if (num_operands >= 16) {
 		llvm::outs() << "num_operands >= 16\n";
@@ -42,7 +42,7 @@ int DecodeAsmOpInfoCallback(void *DisInfo, uint64_t PC,
 	}
 	dis_info->offset[num_operands] = Offset;
 	dis_info->size[num_operands] = Size;
-	llvm::outs() << format("NumOperands = 0x%x, ", num_operands) << format("Offset = 0x%x, ", Offset) << format("Size = 0x%x", Size) << "\n";
+//	llvm::outs() << format("NumOperands = 0x%x, ", num_operands) << format("Offset = 0x%x, ", Offset) << format("Size = 0x%x", Size) << "\n";
 	return 0;
 }
 
