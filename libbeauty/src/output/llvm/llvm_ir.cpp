@@ -18,7 +18,16 @@
 #include "llvm/Bitcode/ReaderWriter.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/raw_ostream.h"
+
+#define STORE_DIRECT 0
+
 using namespace llvm;
+
+struct declaration_s {
+	std::vector<Type*>FuncTy_0_args;
+	FunctionType *FT;
+	Function *F;
+};
 
 		CmpInst::Predicate predicate_to_llvm_table[] =  {
 			ICmpInst::FCMP_FALSE,  /// None
@@ -44,8 +53,8 @@ class LLVM_ir_export
 {
 	public:
 		int find_function_member_node(struct self_s *self, struct external_entry_point_s *external_entry_point, int node_to_find, int *member_node);
-		int add_instruction(struct self_s *self, Module *mod, Value **value, BasicBlock **bb, int node, int external_entry, int inst);
-		int add_node_instructions(struct self_s *self, Module *mod, Value **value, BasicBlock **bb, int node, int external_entry);
+		int add_instruction(struct self_s *self, Module *mod, struct declaration_s *declaration, Value **value, BasicBlock **bb, int node, int external_entry, int inst);
+		int add_node_instructions(struct self_s *self, Module *mod, struct declaration_s *declaration, Value **value, BasicBlock **bb, int node, int external_entry);
 		int fill_value(struct self_s *self, Value **value, int value_id, int external_entry);
 		int output(struct self_s *self);
 
@@ -70,7 +79,7 @@ int LLVM_ir_export::find_function_member_node(struct self_s *self, struct extern
 	return found;
 }
 
-int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, Value **value, BasicBlock **bb, int node, int external_entry, int inst)
+int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct declaration_s *declaration, Value **value, BasicBlock **bb, int node, int external_entry, int inst)
 {
 	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
 	struct inst_log_entry_s *inst_log1 = &inst_log_entry[inst];
@@ -79,6 +88,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, Value **va
 	Value *srcA;
 	Value *srcB;
 	Value *dstA;
+	Value *value_tmp;
 	uint64_t srcA_size;
 	uint64_t srcB_size;
 	int value_id;
@@ -296,26 +306,35 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, Value **va
 		{
 			struct extension_call_s *call_info = static_cast<struct extension_call_s *> (inst_log1->extension);
 			std::vector<Value*> vector_params;
+			int function_to_call = 0;
+
+			printf("LLVM 0x%x: params_size = 0x%x:0x%x\n", inst, call_info->params_size, declaration[0].FT->getNumParams());
 			for (n = 0; n < call_info->params_size; n++) {
-				vector_params.push_back(value[call_info->params[n]]);
+				value_id = external_entry_point->label_redirect[call_info->params[n]].redirect;
+				printf("call_info_params = 0x%x->0x%x, %p\n", call_info->params[n], value_id, value[value_id]);
+				vector_params.push_back(value[value_id]);
 			}
+			PointerType* PointerTy_1 = PointerType::get(IntegerType::get(mod->getContext(), 64), 0);
+			ConstantPointerNull* const_ptr_5 = ConstantPointerNull::get(PointerTy_1);
+			vector_params.push_back(const_ptr_5); /* EIP */
+			printf("LLVM 0x%x: args_size = 0x%x\n", inst, vector_params.size());
 			tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
-#if 0
-			CallInst* call_inst = CallInst::Create(func_test22a, vector_params, buffer, bb[node]);
+			declaration[0].F->dump();
+			for(auto i : vector_params) {
+				i->dump();
+			}
+			function_to_call = 0;
+			if ((1 == inst_log1->instruction.srcA.relocated) &&
+				(STORE_DIRECT == inst_log1->instruction.srcA.store)) {
+				function_to_call = inst_log1->instruction.srcA.index;
+			}
+			CallInst* call_inst = CallInst::Create(declaration[function_to_call].F, vector_params, buffer, bb[node]);
 			call_inst->setCallingConv(CallingConv::C);
 			call_inst->setTailCall(false);
 			dstA = call_inst;
 			value[inst_log1->value3.value_id] = dstA;
-#endif
+			dstA->dump();
 		}
-		//std::vector<Value*> int32_25_params;
-		//int32_25_params.push_back(int32_23);
-		//int32_25_params.push_back(int32_24);
-		//CallInst* int32_25 = CallInst::Create(func_test22a, int32_25_params, "", label_18);
-		//int32_25->setCallingConv(CallingConv::C);
-		//int32_25->setTailCall(false);
-
-
 		break;
 	case 0x1e:  // RET
 		printf("LLVM 0x%x: OPCODE = 0x%x:RET\n", inst, inst_log1->instruction.opcode);
@@ -564,7 +583,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, Value **va
 	return result;
 } 
 
-int LLVM_ir_export::add_node_instructions(struct self_s *self, Module *mod, Value** value, BasicBlock **bb, int node, int external_entry) 
+int LLVM_ir_export::add_node_instructions(struct self_s *self, Module *mod, struct declaration_s *declaration, Value** value, BasicBlock **bb, int node, int external_entry) 
 {
 	struct inst_log_entry_s *inst_log1;
 	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
@@ -587,7 +606,7 @@ int LLVM_ir_export::add_node_instructions(struct self_s *self, Module *mod, Valu
 		inst_log1 =  &inst_log_entry[inst];
 		printf("LLVM node end: inst_end = 0x%x, next_size = 0x%x, node_end = 0x%x\n",
 			nodes[node].inst_end, inst_log1->next_size, inst_log1->node_end);
-		tmp = add_instruction(self, mod, value, bb, node, external_entry, inst);
+		tmp = add_instruction(self, mod, declaration, value, bb, node, external_entry, inst);
 		if (inst_log1->next_size > 0) {
 			inst_next = inst_log1->next[0];
 		}
@@ -653,7 +672,8 @@ int LLVM_ir_export::output(struct self_s *self)
 	int index;
 	
 	struct external_entry_point_s *external_entry_points = self->external_entry_points;
-	
+	struct declaration_s *declaration = static_cast <struct declaration_s *> (calloc(EXTERNAL_ENTRY_POINTS_MAX, sizeof (struct declaration_s)));
+
 	for (n = 0; n < EXTERNAL_ENTRY_POINTS_MAX; n++) {
 		if ((external_entry_points[n].valid != 0) &&
 			(external_entry_points[n].type == 1) && 
@@ -684,54 +704,75 @@ int LLVM_ir_export::output(struct self_s *self)
 				}
 			}
 
+			for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+				if ((external_entry_points[l].valid != 0) &&
+					(external_entry_points[l].type == 1) &&
+					(n == 0)) {
+					//std::vector<Type*>FuncTy_0_args;
+					struct label_s *labels_ext = external_entry_points[l].labels;
+					for (m = 0; m < external_entry_points[l].params_reg_ordered_size; m++) {
+						index = external_entry_points[l].params_reg_ordered[m];
+						if (labels_ext[index].lab_pointer > 0) {
+							int size = labels_ext[index].pointer_type_size_bits;
+							printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							if (size < 8) {
+								printf("FIXME: size too small\n");
+								size = 8;
+							}
+							declaration[l].FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
+						} else {
+							int size = labels_ext[index].size_bits;
+							printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							declaration[l].FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
+						}
+					}
+					for (m = 0; m < external_entry_points[l].params_stack_ordered_size; m++) {
+						index = external_entry_points[l].params_stack_ordered[m];
+						if (index == 3) {
+						/* EIP or param_stack0000 */
+						}
+						if (labels_ext[index].lab_pointer > 0) {
+							int size = labels_ext[index].pointer_type_size_bits;
+							printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							if (size < 8) {
+								printf("FIXME: size too small\n");
+								size = 64;
+							}
+							declaration[l].FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
+						} else {
+							int size = labels_ext[index].size_bits;
+							printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							declaration[l].FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
+						}
+					}
+				}
+			}
+
+			for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+				if ((external_entry_points[l].valid != 0) &&
+					(external_entry_points[l].type == 1)) {
+					FunctionType *FT =
+						FunctionType::get(Type::getInt32Ty(Context),
+							declaration[l].FuncTy_0_args,
+							false); /*not vararg*/
+					declaration[l].FT = FT;
+				}
+			}
+			for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+				if ((external_entry_points[l].valid != 0) &&
+					(external_entry_points[l].type == 1)) {
+					function_name = external_entry_points[l].name;
+					Function *F =
+						Function::Create(declaration[l].FT, Function::ExternalLinkage, function_name, mod);
+					declaration[l].F = F;
+					declaration[l].F->dump();
+				}
+			}
 
 			function_name = external_entry_points[n].name;
 			snprintf(output_filename, 500, "./llvm/%s.bc", function_name);
-			std::vector<Type*>FuncTy_0_args;
-			for (m = 0; m < external_entry_points[n].params_reg_ordered_size; m++) {
-				index = external_entry_points[n].params_reg_ordered[m];
-				if (labels[index].lab_pointer > 0) {
-					int size = labels[index].pointer_type_size_bits;
-					printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
-					if (size < 8) {
-						printf("FIXME: size too small\n");
-						size = 8;
-					}
-					FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
-				} else {	
-					int size = labels[index].size_bits;
-					printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
-					FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
-				}
-			}
-			for (m = 0; m < external_entry_points[n].params_stack_ordered_size; m++) {
-				index = external_entry_points[n].params_stack_ordered[m];
-				if (index == 3) {
-				/* EIP or param_stack0000 */
-				}
-				if (labels[index].lab_pointer > 0) {
-					int size = labels[index].pointer_type_size_bits;
-					printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
-					if (size < 8) {
-						printf("FIXME: size too small\n");
-						size = 8;
-					}
-					FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
-				} else {
-					int size = labels[index].size_bits;
-					printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
-					FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
-				}
-			}
 
-			FunctionType *FT =
-				FunctionType::get(Type::getInt32Ty(Context),
-					FuncTy_0_args,
-					false); /*not vararg*/
-
-			Function *F = Function::Create(FT, Function::ExternalLinkage, function_name, mod);
-
-			Function::arg_iterator args = F->arg_begin();
+			Function::arg_iterator args = declaration[n].F->arg_begin();
 			printf("Function: %s()  param_size = 0x%x\n", function_name, external_entry_points[n].params_size);
 			for (m = 0; m < external_entry_points[n].params_reg_ordered_size; m++) {
 				index = external_entry_points[n].params_reg_ordered[m];
@@ -758,7 +799,7 @@ int LLVM_ir_export::output(struct self_s *self)
 				tmp_str << "Node_0x" << std::hex << m;
 				node_string = tmp_str.str();
 				printf("LLVM2: %s\n", node_string.c_str());
-				bb[m] = BasicBlock::Create(Context, node_string, F);
+				bb[m] = BasicBlock::Create(Context, node_string, declaration[n].F);
 			}
 
 			/* Create the AllocaInst's */
@@ -827,7 +868,7 @@ int LLVM_ir_export::output(struct self_s *self)
 					}
 					/* The rest of the PHI instruction is added later */
 				}
-				LLVM_ir_export::add_node_instructions(self, mod, value, bb, node, n);
+				LLVM_ir_export::add_node_instructions(self, mod, declaration, value, bb, node, n);
 			}
 
 			for (node = 1; node < nodes_size; node++) {
