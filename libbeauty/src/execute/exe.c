@@ -1822,6 +1822,20 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		inst->value1.init_value = value->offset_value;
 
 		/* Link the call destination to a valid external_entry_point if possible */
+		if (instruction->srcA.relocated == 2) {
+			for (n = 0; n < EXTERNAL_ENTRY_POINTS_MAX; n++) {
+				struct external_entry_point_s *external_entry_points = self->external_entry_points;
+				if ((external_entry_points[n].valid != 0) &&
+					(external_entry_points[n].type == 1) &&
+					(external_entry_points[n].value == instruction->srcA.relocated_index)) {
+					//debug_print(DEBUG_OUTPUT, 1, "found external relocated 0x%x\n", n);
+					instruction->srcA.index = n;
+					instruction->srcA.relocated = 1;
+					break;
+				}
+			}
+		}
+		/* Link the call destination to a valid external_entry_point if possible */
 		if ((instruction->srcA.relocated == 0) &&
 			(instruction->srcA.indirect == IND_DIRECT)) {
 			debug_print(DEBUG_OUTPUT, 1, "CALL: SCANNING for call_offset\n");
