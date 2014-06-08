@@ -41,12 +41,27 @@ build_reg_table_SOURCES = \
 
 #dis64_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lopcodes -liberty -lbeauty_exe -lbeauty_analyse -lbeauty_output -lbeauty_llvm -lbfd -lz -ldl
 dis64_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lbeauty_exe \
-		-lbeauty_analyse -lbeauty_output_cfg -lbeauty_output_llvm -lz -ldl \
-		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl -lLLVM-3.5svn
+		-lbeauty_analyse -lbeauty_output_cfg -lbeauty_output_llvm \
+		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl \
+		-lLLVM-3.5svn \
+		-lstdc++ -lz -lm -ldl -lpthread -lncurses
+#dis64_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lbeauty_exe \
+#		-lbeauty_analyse -lbeauty_output_cfg -lbeauty_output_llvm \
+#		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl \
+#		-lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
+#		-lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMX86Desc \
+#		-lLLVMMC -lLLVMMCParser -lLLVMX86AsmPrinter -lLLVMObject -lLLVMX86Utils \
+#		-lLLVMBitWriter -lLLVMCore -lLLVMSupport \
+#		-lstdc++ -lz -lm -ldl -lpthread -lncurses
 #test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
-test_id_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.5svn -lbeauty_input_bfd -lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl -lbeauty_output_cfg -L/usr/local/lib -lstdc++ 
+#test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
+test_id_LDADD = -L$(libdir) -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
+		-lLLVMMCDisassembler -lLLVMX86Disassembler -lbeauty_input_bfd \
+		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl -lbeauty_output_cfg \
+		-L/usr/local/lib -lstdc++ 
 #test_id_arm_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.4svn -lbeauty_output -L/usr/local/lib/llvm/lib -lstdc++
-test_case_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.5svn -L/usr/local/lib/ -lstdc++
+test_case_LDADD = -L$(libdir) -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
+		 -lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMSupport -L/usr/local/lib/ -lstdc++
 build_reg_table_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.5svn -L/usr/local/lib/ -lstdc++
 #mem_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
 
