@@ -199,6 +199,7 @@ struct helper_reg_table_s helper_reg_table[] = {
 	{"%xmm0", 128, REG_XMM0},
 	{"%al", 8, REG_AX},
 	{"%dl", 8, REG_DX},
+	{"%bl", 8, REG_BX},
 	{"%sil", 8, REG_SI},
 	{"%ax", 16, REG_AX},
 	{"%cx", 16, REG_CX},
