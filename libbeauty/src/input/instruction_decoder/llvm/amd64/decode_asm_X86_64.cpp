@@ -202,7 +202,7 @@ int DecodeAsmX86_64::get_reg_size_helper(int value, int *reg_index) {
 			return 0;
 		}
 	}
-	outs() << format("ERROR: get_reg_size_helper Unknown reg value = 0x%x\n", value);
+	outs() << format("ERROR: get_reg_size_helper Unknown reg value = 0x%x:%s\n", value, reg_name);
 #if 0
 	for (n = 1; n < 233; n++) {
 		outs() << format("Reg:0x%x\n", n);
