@@ -154,7 +154,6 @@ struct helper_reg_table_s {
 struct helper_reg_table_s helper_reg_table[] = {
 	{"none", 0, 0},
 	{"%cs", 16, REG_CS},
-	{"%dx", 16, REG_DX},
 	{"%eax", 32, REG_AX},
 	{"%ecx", 32, REG_CX},
 	{"%edx", 32, REG_DX},
@@ -198,10 +197,21 @@ struct helper_reg_table_s helper_reg_table[] = {
 	{"%r14d", 32, REG_14},
 	{"%r15d", 32, REG_15},
 	{"%xmm0", 128, REG_XMM0},
+	{"%al", 8, REG_AX},
 	{"%dl", 8, REG_DX},
 	{"%sil", 8, REG_SI},
 	{"%ax", 16, REG_AX},
-	{"%al", 8, REG_AX},
+	{"%cx", 16, REG_CX},
+	{"%dx", 16, REG_DX},
+	{"%bx", 16, REG_BX},
+	{"%r8w", 16, REG_08},
+	{"%r9w", 16, REG_09},
+	{"%r10w", 16, REG_10},
+	{"%r11w", 16, REG_11},
+	{"%r12w", 16, REG_12},
+	{"%r13w", 16, REG_13},
+	{"%r14w", 16, REG_14},
+	{"%r15w", 16, REG_15},
 };
 
 struct decode_inst_helper_s {
