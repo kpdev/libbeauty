@@ -827,7 +827,7 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		/* Get value of srcA */
 		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcA), &(inst->value1), 0); 
 		/* Get value of srcB */
-		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcB), &(inst->value2), 0); 
+		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcB), &(inst->value2), 1); 
 		/* Create result */
 		debug_print(DEBUG_EXE, 1, "CMP\n");
 		//debug_print(DEBUG_EXE, 1, "value1 = 0x%x, value2 = 0x%x\n", inst->value1, inst->value2);
@@ -1892,6 +1892,7 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 	}
 	switch (instruction->opcode) {
 	case NOP:
+	case CMP:
 		break;
 	default: 
 		if (inst->value3.value_scope == 0) {
