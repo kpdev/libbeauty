@@ -1152,6 +1152,7 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		break;
 	case MUL:  /* Unsigned mul */
 	case IMUL: /* FIXME: Handled signed case */
+		/* If the MUL is has an immediate value, it will be in srcA, so that type info from srcB */
 		/* Get value of srcA */
 		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcA), &(inst->value1), 0); 
 		/* Get value of dstA */
@@ -1161,28 +1162,20 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		inst->value3.start_address = instruction->dstA.index;
 		inst->value3.length = instruction->dstA.value_size;
 		//inst->value3.length = inst->value1.length;
-		inst->value3.init_value_type = inst->value1.init_value_type;
-		inst->value3.init_value = inst->value1.init_value;
+		inst->value3.init_value_type = inst->value2.init_value_type;
+		inst->value3.init_value = inst->value2.init_value;
 		inst->value3.offset_value =
 			((inst->value1.offset_value + inst->value1.init_value) 
 			* (inst->value2.offset_value + inst->value2.init_value))
 			 - inst->value1.init_value;
-		inst->value3.value_type = inst->value1.value_type;
-		if (inst->instruction.dstA.indirect) {
-			inst->value3.indirect_init_value =
-				inst->value1.indirect_init_value;
-			inst->value3.indirect_offset_value =
-				inst->value1.indirect_offset_value;
-			inst->value3.value_id =
-				inst->value1.value_id;
-		}
+		inst->value3.value_type = inst->value2.value_type;
 		inst->value3.ref_memory =
-			inst->value1.ref_memory;
+			inst->value2.ref_memory;
 		inst->value3.ref_log =
-			inst->value1.ref_log;
-		inst->value3.value_scope = inst->value1.value_scope;
+			inst->value2.ref_log;
+		inst->value3.value_scope = inst->value2.value_scope;
 		/* Counter */
-		inst->value3.value_id = inst->value1.value_id;
+		inst->value3.value_id = inst->value2.value_id;
 		/* 1 - Entry Used */
 		inst->value3.valid = 1;
 			debug_print(DEBUG_EXE, 1, "value=0x%"PRIx64"+0x%"PRIx64"=0x%"PRIx64"\n",
