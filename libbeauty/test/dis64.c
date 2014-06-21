@@ -5115,24 +5115,28 @@ int main(int argc, char *argv[])
 	}
 #endif
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
-		for (m = 0; m < MAX_REG; m++) {
-			if (self->external_entry_points[l].param_reg_label[m]) {
-				debug_print(DEBUG_MAIN, 1, "Entry Point 0x%x: Found reg 0x%x as param label 0x%x\n", l, m,
-					self->external_entry_points[l].param_reg_label[m]);
+		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
+			for (m = 0; m < MAX_REG; m++) {
+				if (self->external_entry_points[l].param_reg_label[m]) {
+					debug_print(DEBUG_MAIN, 1, "Entry Point 0x%x: Found reg 0x%x as param label 0x%x\n", l, m,
+						self->external_entry_points[l].param_reg_label[m]);
+				}
 			}
 		}
 	}
 	/* Fill in reg_params_size */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
-		for (m = 0; m < reg_params_order_size; m++) {
-			if (self->external_entry_points[l].param_reg_label[reg_params_order[m]]) {
-				debug_print(DEBUG_MAIN, 1, "Entry Point 0x%x: Found reg_params_order 0x%x as param label 0x%x\n", l, m,
-					self->external_entry_points[l].param_reg_label[reg_params_order[m]]);
-				 self->external_entry_points[l].reg_params_size = m + 1;
+		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
+			for (m = 0; m < reg_params_order_size; m++) {
+				if (self->external_entry_points[l].param_reg_label[reg_params_order[m]]) {
+					debug_print(DEBUG_MAIN, 1, "Entry Point 0x%x: Found reg_params_order 0x%x as param label 0x%x\n", l, m,
+						self->external_entry_points[l].param_reg_label[reg_params_order[m]]);
+					 self->external_entry_points[l].reg_params_size = m + 1;
+				}
 			}
+			debug_print(DEBUG_MAIN, 1, "Entry Point 0x%x: external_entry_point->reg_params_size = 0x%x\n",
+				l, self->external_entry_points[l].reg_params_size);
 		}
-		debug_print(DEBUG_MAIN, 1, "Entry Point 0x%x: external_entry_point->reg_params_size = 0x%x\n",
-			l, self->external_entry_points[l].reg_params_size);
 	}
 	/* Enter value id/label id of param into phi with src node 0. */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {

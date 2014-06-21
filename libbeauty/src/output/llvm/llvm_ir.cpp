@@ -435,6 +435,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		result = 1;
 		break;
 	case 0x25:  // LOAD
+		LoadInst* dstA_load;
 		printf("LLVM 0x%x: OPCODE = 0x%x:LOAD\n", inst, inst_log1->instruction.opcode);
 //		if (inst_log1->instruction.dstA.index == 0x28) {
 //			/* Skip the 0x28 reg as it is the SP reg */
@@ -442,25 +443,40 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 //		}
 		switch (inst_log1->instruction.srcA.indirect) {
 		case 1:  // Memory
-			printf("value_id1 = 0x%lx->0x%lx, value_id3 = 0x%lx->0x%lx\n",
+			printf("value_id1 = 0x%lx->0x%lx, value_id2 = 0x%lx->0x%lx value_id3 = 0x%lx->0x%lx\n",
 				inst_log1->value1.value_id,
 				external_entry_point->label_redirect[inst_log1->value1.value_id].redirect,
+				inst_log1->value2.value_id,
+				external_entry_point->label_redirect[inst_log1->value2.value_id].redirect,
 				inst_log1->value3.value_id,
 				external_entry_point->label_redirect[inst_log1->value3.value_id].redirect);
 			value_id = external_entry_point->label_redirect[inst_log1->value1.value_id].redirect;
+			if (!value[value_id]) {
+				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+				if (tmp) {
+					printf("failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+					exit(1);
+				}
+			}
+			srcA = value[value_id];
+			value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
+			if (!value[value_id]) {
+				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+				if (tmp) {
+					printf("failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+					exit(1);
+				}
+			}
+			srcB = value[value_id];
+			printf("srcA = %p, srcB = %p\n", srcA, srcB);
+			srcA->dump();
+			srcB->dump();
 			value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
 			label = &external_entry_point->labels[value_id_dst];
-			if (value_id) {
-				srcA = value[value_id];
-				tmp = label_to_string(label, buffer, 1023);
-				LoadInst* dstA_load = new LoadInst(srcA, buffer, false, bb[node]);
-				dstA_load->setAlignment(label->size_bits >> 3);
-				dstA = dstA_load;
-			} else {
-				printf("LLVM 0x%x: FIXME: Invalid srcA value_id\n", inst);
-				printf("inst indirect = 0x%x\n", inst_log1->instruction.srcA.indirect);
-			}
-
+			tmp = label_to_string(label, buffer, 1023);
+			dstA_load = new LoadInst(srcA, buffer, false, bb[node]);
+			dstA_load->setAlignment(label->size_bits >> 3);
+			dstA = dstA_load;
 			if (value_id_dst) {
 				value[value_id_dst] = dstA;
 			} else {
@@ -468,29 +484,40 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 			break;
 		case 2:  // Stack
-			printf("value_id1 = 0x%lx->0x%lx, value_id3 = 0x%lx->0x%lx\n",
+			printf("value_id1 = 0x%lx->0x%lx, value_id2 = 0x%lx->0x%lx value_id3 = 0x%lx->0x%lx\n",
 				inst_log1->value1.value_id,
 				external_entry_point->label_redirect[inst_log1->value1.value_id].redirect,
+				inst_log1->value2.value_id,
+				external_entry_point->label_redirect[inst_log1->value2.value_id].redirect,
 				inst_log1->value3.value_id,
 				external_entry_point->label_redirect[inst_log1->value3.value_id].redirect);
 			value_id = external_entry_point->label_redirect[inst_log1->value1.value_id].redirect;
-			value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
-			label = &external_entry_point->labels[value_id_dst];
-			if (value_id) {
-				srcA = value[value_id];
-				if (!srcA) {
-					printf("LOAD failed: value_id = 0x%x\n", value_id);
+			if (!value[value_id]) {
+				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+				if (tmp) {
+					printf("failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 					exit(1);
 				}
-				tmp = label_to_string(label, buffer, 1023);
-				LoadInst* dstA_load = new LoadInst(srcA, buffer, false, bb[node]);
-				dstA_load->setAlignment(label->size_bits >> 3);
-				dstA = dstA_load;
-			} else {
-				printf("LLVM 0x%x: FIXME: Invalid srcA value_id\n", inst);
-				printf("inst indirect = 0x%x\n", inst_log1->instruction.srcA.indirect);
 			}
-
+			srcA = value[value_id];
+			value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
+			if (!value[value_id]) {
+				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+				if (tmp) {
+					printf("failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+					exit(1);
+				}
+			}
+			srcB = value[value_id];
+			printf("srcA = %p, srcB = %p\n", srcA, srcB);
+			srcA->dump();
+			srcB->dump();
+			value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
+			label = &external_entry_point->labels[value_id_dst];
+			tmp = label_to_string(label, buffer, 1023);
+			dstA_load = new LoadInst(srcA, buffer, false, bb[node]);
+			dstA_load->setAlignment(label->size_bits >> 3);
+			dstA = dstA_load;
 			if (value_id_dst) {
 				value[value_id_dst] = dstA;
 			} else {
@@ -543,11 +570,13 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 //			/* Skip the 0x28 reg as it is the SP reg */
 //			break;
 //		}
-		printf("value_id1 = 0x%lx->0x%lx, value_id2 = 0x%lx->0x%lx\n",
+		printf("value_id1 = 0x%lx->0x%lx, value_id2 = 0x%lx->0x%lx value_id3 = 0x%lx->0x%lx\n",
 			inst_log1->value1.value_id,
 			external_entry_point->label_redirect[inst_log1->value1.value_id].redirect,
 			inst_log1->value2.value_id,
-			external_entry_point->label_redirect[inst_log1->value2.value_id].redirect);
+			external_entry_point->label_redirect[inst_log1->value2.value_id].redirect,
+			inst_log1->value3.value_id,
+			external_entry_point->label_redirect[inst_log1->value3.value_id].redirect);
 		value_id = external_entry_point->label_redirect[inst_log1->value1.value_id].redirect;
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
@@ -571,6 +600,8 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		srcB->dump();
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = GetElementPtrInst::Create(srcA, srcB, buffer, bb[node]);
+		printf("dstA = %p\n", dstA);
+		dstA->dump();
 		value[inst_log1->value3.value_id] = dstA;
 		break;
 	default:
@@ -714,7 +745,7 @@ int LLVM_ir_export::output(struct self_s *self)
 						index = external_entry_points[l].params_reg_ordered[m];
 						if (labels_ext[index].lab_pointer > 0) {
 							int size = labels_ext[index].pointer_type_size_bits;
-							printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							printf("Reg Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
 							if (size < 8) {
 								printf("FIXME: size too small\n");
 								size = 8;
@@ -722,7 +753,7 @@ int LLVM_ir_export::output(struct self_s *self)
 							declaration[l].FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
 						} else {
 							int size = labels_ext[index].size_bits;
-							printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							printf("Reg Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
 							declaration[l].FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
 						}
 					}
@@ -733,7 +764,7 @@ int LLVM_ir_export::output(struct self_s *self)
 						}
 						if (labels_ext[index].lab_pointer > 0) {
 							int size = labels_ext[index].pointer_type_size_bits;
-							printf("Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							printf("Stack Param=0x%x: Pointer Label 0x%x, size_bits = 0x%x\n", m, index, size);
 							if (size < 8) {
 								printf("FIXME: size too small\n");
 								size = 64;
@@ -741,7 +772,7 @@ int LLVM_ir_export::output(struct self_s *self)
 							declaration[l].FuncTy_0_args.push_back(PointerType::get(IntegerType::get(mod->getContext(), size), 0));
 						} else {
 							int size = labels_ext[index].size_bits;
-							printf("Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
+							printf("Stack Param=0x%x: Label 0x%x, size_bits = 0x%x\n", m, index, size);
 							declaration[l].FuncTy_0_args.push_back(IntegerType::get(mod->getContext(), size));
 						}
 					}
@@ -777,18 +808,20 @@ int LLVM_ir_export::output(struct self_s *self)
 			for (m = 0; m < external_entry_points[n].params_reg_ordered_size; m++) {
 				index = external_entry_points[n].params_reg_ordered[m];
 				value[index] = args;
-				args++;
 				tmp = label_to_string(&(labels[index]), buffer, 1023);
 				printf("Adding reg param:%s:value index=0x%x\n", buffer, index);
 				value[index]->setName(buffer);
+				value[index]->dump();
+				args++;
 			}
 			for (m = 0; m < external_entry_points[n].params_stack_ordered_size; m++) {
 				index = external_entry_points[n].params_stack_ordered[m];
 				value[index] = args;
-				args++;
 				tmp = label_to_string(&(labels[index]), buffer, 1023);
 				printf("Adding stack param:%s:value index=0x%x\n", buffer, index);
 				value[index]->setName(buffer);
+				value[index]->dump();
+				args++;
 			}
 
 			/* Create all the nodes/basic blocks */
