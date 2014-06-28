@@ -872,7 +872,7 @@ int LLVM_ir_export::output(struct self_s *self)
 				printf("JCD12: node:0x%x: next_size = 0x%x\n", m, nodes[m].next_size);
 			};
 			for (node = 1; node < nodes_size; node++) {
-				printf("LLVM: node=0x%x\n", node);
+				printf("LLVM: PHI PHASE 1: node=0x%x\n", node);
 
 				/* Output PHI instructions first */
 				for (m = 0; m < nodes[node].phi_size; m++) {
@@ -912,7 +912,7 @@ int LLVM_ir_export::output(struct self_s *self)
 			}
 
 			for (node = 1; node < nodes_size; node++) {
-				printf("LLVM: node=0x%x\n", node);
+				printf("LLVM: PHI PHASE 2: node=0x%x\n", node);
 
 				for (m = 0; m < nodes[node].phi_size; m++) {
 					int size_bits = labels[nodes[node].phi[m].value_id].size_bits;
