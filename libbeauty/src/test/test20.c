@@ -9,6 +9,6 @@ int test20b(int value2 )
 
 int test20a(int value1)
 {
-	return test37b(value1);
+	return test20b(value1);
 }
 
