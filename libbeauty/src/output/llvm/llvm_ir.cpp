@@ -320,8 +320,12 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			printf("LLVM 0x%x: args_size = 0x%x\n", inst, vector_params.size());
 			tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 			declaration[0].F->dump();
+			printf("LLVM 0x%x: declaration dump done.\n", inst);
 			for(auto i : vector_params) {
-				i->dump();
+				printf("LLVM 0x%x: dumping vector_params %p\n", inst, i);
+				if (i) {
+					i->dump();
+				}
 			}
 			function_to_call = 0;
 			if ((1 == inst_log1->instruction.srcA.relocated) &&
@@ -329,10 +333,13 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 				function_to_call = inst_log1->instruction.srcA.index;
 			}
 			CallInst* call_inst = CallInst::Create(declaration[function_to_call].F, vector_params, buffer, bb[node]);
+			printf("LLVM 0x%x: call_inst %p\n", inst, call_inst);
+
 			call_inst->setCallingConv(CallingConv::C);
 			call_inst->setTailCall(false);
 			dstA = call_inst;
 			value[inst_log1->value3.value_id] = dstA;
+			printf("LLVM 0x%x: dstA %p\n", inst, dstA);
 			dstA->dump();
 		}
 		break;
