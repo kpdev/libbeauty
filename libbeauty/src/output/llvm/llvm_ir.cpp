@@ -312,6 +312,10 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			for (n = 0; n < call_info->params_size; n++) {
 				value_id = external_entry_point->label_redirect[call_info->params[n]].redirect;
 				printf("call_info_params = 0x%x->0x%x, %p\n", call_info->params[n], value_id, value[value_id]);
+				if (!value_id) {
+					printf("ERROR: invalid call_info_param\n");
+					exit(1);
+				}
 				vector_params.push_back(value[value_id]);
 			}
 			PointerType* PointerTy_1 = PointerType::get(IntegerType::get(mod->getContext(), 64), 0);
