@@ -1621,7 +1621,7 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				reg_tracker[m]);
 		} else {
 			reg_tracker[m] = 0;
-			//debug_print(DEBUG_MAIN, 1, "Node 0x%x: reg 0x%x given value_id no value\n", node, m);
+			//debug_print(DEBUG_MAIN, 1, "Node 0x%x: reg 0x%x given value_id zero value\n", node, m);
 		}
 	}
 
@@ -1663,7 +1663,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:MOV srcA direct given value_id = 0x%"PRIx64"\n", entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:MOV srcA direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				variable_id++;
 				break;
@@ -1673,8 +1674,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_DIRECT:
 					inst_log1->value1.value_id = 
 						reg_tracker[instruction->srcA.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:MOV srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:MOV srcA given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value1.value_id);
 					break;
 				default:
@@ -1694,8 +1695,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				switch(instruction->dstA.indirect) {
 				case IND_DIRECT:
 					reg_tracker[instruction->dstA.index] = inst_log1->value3.value_id;
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						instruction->dstA.index,
 						inst_log1->value3.value_id);
 					break;
@@ -1737,8 +1738,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD srcA direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD srcA direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				variable_id++;
 				break;
@@ -1746,8 +1747,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				switch(instruction->srcA.indirect) {
 				case IND_STACK:
 					stack_address = inst_log1->value1.indirect_init_value + inst_log1->value1.indirect_offset_value;
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD assign_id: stack_address = 0x%"PRIx64"\n",
-						entry_point, inst, stack_address);
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD assign_id: stack_address = 0x%"PRIx64"\n",
+						entry_point, node, inst, stack_address);
 					memory = search_store(
 						external_entry_point->process_state.memory_stack,
 						stack_address,
@@ -1755,12 +1756,12 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 					if (memory) {
 						if (memory->value_id) {
 							inst_log1->value1.value_id = memory->value_id;
-							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD srcA reg given value_id = 0x%"PRIx64"\n",
-								entry_point, inst,
+							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD srcA reg given value_id = 0x%"PRIx64"\n",
+								entry_point, node, inst,
 								inst_log1->value1.value_id); 
 						} else {
-							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD stack found: no value_id. stack_address = 0x%"PRIx64"\n",
-								entry_point, inst, stack_address);
+							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD stack found: no value_id. stack_address = 0x%"PRIx64"\n",
+								entry_point, node, inst, stack_address);
 
 							if (memory->value_scope == 1) {
 								inst_log1->value1.value_id = variable_id;
@@ -1776,13 +1777,14 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 									inst_log1->value1.indirect_offset_value,
 									&label);
 								if (ret) {
-									debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD srcA unknown label\n",
-										entry_point, inst);
+									debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD srcA unknown label\n",
+										entry_point, node, inst);
 									exit(1);
 								}
 
-								debug_print(DEBUG_MAIN, 1, "value to log_to_label:inst = 0x%x:0x%04x: LOAD 0x%x, 0x%"PRIx64", 0x%x, 0x%x, 0x%"PRIx64", 0x%"PRIx64"\n",
+								debug_print(DEBUG_MAIN, 1, "value to log_to_label:inst = 0x%x:0x%x:0x%04x: LOAD 0x%x, 0x%"PRIx64", 0x%x, 0x%x, 0x%"PRIx64", 0x%"PRIx64"\n",
 									entry_point,
+									node,
 									inst,
 									instruction->srcA.indirect,
 									instruction->srcA.index,
@@ -1806,14 +1808,14 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 								external_entry_point->labels[variable_id].lab_pointer += label.lab_pointer;
 								variable_id++;
 							} else {
-								debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD value_scope = 0x%x not in param_stack range!\n",
-									entry_point, inst, memory->value_scope);
+								debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD value_scope = 0x%x not in param_stack range!\n",
+									entry_point, node, inst, memory->value_scope);
 								exit(1);
 							}
 						}
 					} else {
-						debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD stack not found: stack_address = 0x%"PRIx64"\n",
-							entry_point, inst, stack_address);
+						debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD stack not found: stack_address = 0x%"PRIx64"\n",
+							entry_point, node, inst, stack_address);
 						exit(1);
 						/* FIXME: Handle a new memory case */
 					}
@@ -1821,13 +1823,13 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_MEM:
 					inst_log1->value1.value_id = 
 						reg_tracker[instruction->srcA.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD srcA given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value1.value_id);
 					break;
 				default:
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:LOAD UNHANDLED srcA.indirect = 0x%x\n",
-						entry_point, inst, instruction->srcA.indirect);
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD UNHANDLED srcA.indirect = 0x%x\n",
+						entry_point, node, inst, instruction->srcA.indirect);
 					exit(1);
 					break;
 				}
@@ -1864,8 +1866,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: LOAD srcB direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value2.value_id); 
 				variable_id++;
 				break;
@@ -1875,8 +1877,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_DIRECT:
 					inst_log1->value2.value_id = 
 						reg_tracker[instruction->srcB.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: LOAD srcB given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value2.value_id);
 					break;
 				case IND_STACK:
@@ -1889,8 +1891,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 					if (memory) {
 						if (memory->value_id) {
 							inst_log1->value2.value_id = memory->value_id;
-							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-								entry_point, inst,
+							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: LOAD srcB direct given value_id = 0x%"PRIx64"\n",
+								entry_point, node, inst,
 								inst_log1->value2.value_id); 
 						}
 					}
@@ -1906,8 +1908,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				switch(instruction->dstA.indirect) {
 				case IND_DIRECT:
 					reg_tracker[instruction->dstA.index] = inst_log1->value3.value_id;
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: LOAD reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						instruction->dstA.index,
 						inst_log1->value3.value_id);
 					break;
@@ -1948,8 +1950,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:STORE srcA direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:STORE srcA direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				variable_id++;
 				break;
@@ -1959,8 +1961,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_DIRECT:
 					inst_log1->value1.value_id = 
 						reg_tracker[instruction->srcA.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:STORE srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:STORE srcA given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value1.value_id);
 					break;
 				case IND_STACK:
@@ -1979,13 +1981,13 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_MEM:
 					inst_log1->value1.value_id = 
 						reg_tracker[instruction->srcA.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:STORE srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:STORE srcA given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value1.value_id);
 					break;
 				default:
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:STORE UNHANDLED srcA.indirect = 0x%x\n",
-						entry_point, inst, instruction->srcA.indirect);
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:STORE UNHANDLED srcA.indirect = 0x%x\n",
+						entry_point, node, inst, instruction->srcA.indirect);
 					exit(1);
 					break;
 				}
@@ -2021,8 +2023,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: STORE srcB direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value2.value_id); 
 				variable_id++;
 				break;
@@ -2032,8 +2034,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_DIRECT:
 					inst_log1->value2.value_id = 
 						reg_tracker[instruction->srcB.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: STORE srcA given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value2.value_id);
 					break;
 				case IND_STACK:
@@ -2046,8 +2048,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 					if (memory) {
 						if (memory->value_id) {
 							inst_log1->value2.value_id = memory->value_id;
-							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-								entry_point, inst,
+							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: STORE srcB direct given value_id = 0x%"PRIx64"\n",
+								entry_point, node, inst,
 								inst_log1->value2.value_id); 
 						}
 					}
@@ -2103,8 +2105,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcA direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				variable_id++;
 				break;
@@ -2114,8 +2116,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_DIRECT:
 					inst_log1->value1.value_id = 
 						reg_tracker[instruction->srcA.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value1.value_id);
 					break;
 				case IND_STACK:
@@ -2128,8 +2130,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 					if (memory) {
 						if (memory->value_id) {
 							inst_log1->value1.value_id = memory->value_id;
-							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-								entry_point, inst,
+							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcA direct given value_id = 0x%"PRIx64"\n",
+								entry_point, node, inst,
 								inst_log1->value1.value_id); 
 						}
 					}
@@ -2166,8 +2168,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value2.value_id); 
 				variable_id++;
 				break;
@@ -2177,8 +2179,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				case IND_DIRECT:
 					inst_log1->value2.value_id = 
 						reg_tracker[instruction->srcB.index];
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcB given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						inst_log1->value2.value_id);
 					break;
 				case IND_STACK:
@@ -2191,8 +2193,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 					if (memory) {
 						if (memory->value_id) {
 							inst_log1->value2.value_id = memory->value_id;
-							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-								entry_point, inst,
+							debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
+								entry_point, node, inst,
 								inst_log1->value2.value_id); 
 						}
 					}
@@ -2206,8 +2208,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				switch(instruction->dstA.indirect) {
 				case IND_DIRECT:
 					reg_tracker[instruction->dstA.index] = inst_log1->value3.value_id;
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						instruction->dstA.index,
 						inst_log1->value3.value_id); 
 					break;
@@ -2252,8 +2254,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcA direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				variable_id++;
 				break;
@@ -2264,8 +2266,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				//	&label, &new_label);
 				inst_log1->value1.value_id = 
 					reg_tracker[instruction->srcA.index];
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				break;
 			}
@@ -2299,8 +2301,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcB direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value2.value_id); 
 				variable_id++;
 				break;
@@ -2311,8 +2313,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				//	&label, &new_label);
 				inst_log1->value2.value_id = 
 					reg_tracker[instruction->srcB.index];
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcB given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: srcB given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value2.value_id); 
 				break;
 			}
@@ -2336,8 +2338,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				switch(instruction->dstA.indirect) {
 				case IND_DIRECT:
 					reg_tracker[instruction->dstA.index] = inst_log1->value3.value_id;
-					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
-						entry_point, inst,
+					debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: CALL reg 0x%"PRIx64" given value_id = 0x%"PRIx64"\n",
+						entry_point, node, inst,
 						instruction->dstA.index,
 						inst_log1->value3.value_id); 
 					break;
@@ -2380,8 +2382,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				labels[variable_id].lab_pointer += label.lab_pointer;
 				labels[variable_id].value = label.value;
 				labels[variable_id].size_bits = label.size_bits;
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA direct given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: BC srcA direct given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				variable_id++;
 				break;
@@ -2389,16 +2391,16 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				/* FIXME: TODO*/
 				inst_log1->value1.value_id = 
 					reg_tracker[instruction->srcA.index];
-				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x: srcA given value_id = 0x%"PRIx64"\n",
-					entry_point, inst,
+				debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x: BC srcA given value_id = 0x%"PRIx64"\n",
+					entry_point, node, inst,
 					inst_log1->value1.value_id); 
 				break;
 			}
 		case RET:
 			inst_log1->value1.value_id = 
 				reg_tracker[instruction->srcA.index];
-			debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%04x:RET srcA given value_id = 0x%"PRIx64"\n",
-				entry_point, inst,
+			debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:RET srcA given value_id = 0x%"PRIx64"\n",
+				entry_point, node, inst,
 				inst_log1->value1.value_id); 
 			external_entry_point->returned_label = inst_log1->value1.value_id;
 			break;
@@ -2409,7 +2411,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 			break;
 		default:
 			debug_print(DEBUG_MAIN, 1, "SSA1 failed for Inst:0x%x:0x%04x, OP 0x%x\n",
-				entry_point, inst, instruction->opcode);
+				entry_point, node, inst, instruction->opcode);
+			exit(1);
 			return 1;
 			break;
 		}
@@ -4182,6 +4185,10 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 					(1 == label->type)) {
 					call->params[m] = call->reg_tracker[label->value];
 					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params[m]);
+					if (!(call->reg_tracker[label->value])) {
+						printf("ERROR:%s:%d invalid param at node 0x%x, inst 0x%x\n", __FUNCTION__, __LINE__, node, inst);
+						exit(1);
+					}
 				}
 			}
 			params_stack_size = 0;
