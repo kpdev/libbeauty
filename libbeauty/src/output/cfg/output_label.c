@@ -1127,9 +1127,9 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 					}
 
 					tmp_state = 0;
-					for (n2 = 0; n2 < call->params_size; n2++) {
+					for (n2 = 0; n2 < call->params_reg_size; n2++) {
 						struct label_s *label;
-						tmp = label_redirect[call->params[n2]].redirect;
+						tmp = label_redirect[call->params_reg[n2]].redirect;
 						label = &labels[tmp];
 						if (tmp_state > 0) {
 							dprintf(fd, ", ");

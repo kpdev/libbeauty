@@ -308,10 +308,10 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			std::vector<Value*> vector_params;
 			int function_to_call = 0;
 
-			printf("LLVM 0x%x: params_size = 0x%x:0x%x\n", inst, call_info->params_size, declaration[0].FT->getNumParams());
-			for (n = 0; n < call_info->params_size; n++) {
-				value_id = external_entry_point->label_redirect[call_info->params[n]].redirect;
-				printf("call_info_params = 0x%x->0x%x, %p\n", call_info->params[n], value_id, value[value_id]);
+			printf("LLVM 0x%x: params_size = 0x%x:0x%x\n", inst, call_info->params_reg_size, declaration[0].FT->getNumParams());
+			for (n = 0; n < call_info->params_reg_size; n++) {
+				value_id = external_entry_point->label_redirect[call_info->params_reg[n]].redirect;
+				printf("call_info_params = 0x%x->0x%x, %p\n", call_info->params_reg[n], value_id, value[value_id]);
 				if (!value_id) {
 					printf("ERROR: invalid call_info_param\n");
 					exit(1);
