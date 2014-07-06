@@ -895,6 +895,23 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 			/* DSTA = EAX, SRCN = parameters */
 			case CALL:
 				/* FIXME: TODO params */
+				/* Handle RSP and RBP for now */
+				nodes[node].used_register[REG_SP].src = inst;
+				debug_print(DEBUG_MAIN, 1, "Call Seen RSP\n");
+				if (nodes[node].used_register[REG_SP].seen == 0) {
+					nodes[node].used_register[REG_SP].seen = 1;
+					nodes[node].used_register[REG_SP].size = 64;
+					nodes[node].used_register[REG_SP].src_first = inst;
+					debug_print(DEBUG_MAIN, 1, "Set1A\n");
+				}
+				nodes[node].used_register[REG_BP].src = inst;
+				debug_print(DEBUG_MAIN, 1, "Call Seen RBP\n");
+				if (nodes[node].used_register[REG_BP].seen == 0) {
+					nodes[node].used_register[REG_BP].seen = 1;
+					nodes[node].used_register[REG_BP].size = 64;
+					nodes[node].used_register[REG_BP].src_first = inst;
+					debug_print(DEBUG_MAIN, 1, "Set1B\n");
+				}
 				if ((instruction->dstA.store == STORE_REG) &&
 					(instruction->dstA.indirect == IND_DIRECT)) {
 					nodes[node].used_register[instruction->dstA.index].dst = inst;
@@ -2329,6 +2346,14 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 			call = inst_log1->extension;
 			for (m = 0; m < MAX_REG; m++) {
 				call->reg_tracker[m] = reg_tracker[m];
+			}
+			for (m = 0; m < MAX_REG; m++) {
+				if (call->reg_tracker[m]) {
+					debug_print(DEBUG_MAIN, 1, "Inst:0x%x, call->reg_tracker[0x%x] = 0x%x\n",
+						inst,
+						m,
+						call->reg_tracker[m]);
+				}
 			}
 			/* Used to update the reg_tracker while stepping through the assign src */
 			switch (instruction->dstA.store) {
@@ -4170,21 +4195,21 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 			external_entry_point_callee = &external_entry_points[instruction->srcA.index];
 			labels_callee = external_entry_point_callee->labels;
 			call = inst_log1->extension;
-			call->params_size = external_entry_point_callee->params_reg_ordered_size;
+			call->params_reg_size = external_entry_point_callee->params_reg_ordered_size;
 			/* FIXME: use struct in sizeof bit here */
-			call->params = calloc(call->params_size, sizeof(int *));
+			call->params_reg = calloc(call->params_reg_size, sizeof(int *));
 			if (!call) {
 				debug_print(DEBUG_MAIN, 1, "ERROR: PARAM failed for inst:0x%x, CALL. Out of memory\n", inst);
 				return 1;
 			}
-			debug_print(DEBUG_MAIN, 1, "PARAM:call size=%x\n", call->params_size);
-			for (m = 0; m < call->params_size; m++) {
+			debug_print(DEBUG_MAIN, 1, "PARAM:call size=%x\n", call->params_reg_size);
+			for (m = 0; m < call->params_reg_size; m++) {
 				label = &labels_callee[external_entry_point_callee->params_reg_ordered[m]];
 				/* param_regXXX */
 				if ((2 == label->scope) &&
 					(1 == label->type)) {
-					call->params[m] = call->reg_tracker[label->value];
-					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params[m]);
+					call->params_reg[m] = call->reg_tracker[label->value];
+					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params_reg[m]);
 					if (!(call->reg_tracker[label->value])) {
 						printf("ERROR:%s:%d invalid param at node 0x%x, inst 0x%x\n", __FUNCTION__, __LINE__, node, inst);
 						exit(1);
@@ -4194,11 +4219,10 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 			params_stack_size = 0;
 			for (m = 0; m < external_entry_point_callee->params_size; m++) {
 				label = &labels_callee[external_entry_point_callee->params[m]];
-				/* param_regXXX */
+				/* param_stackXXX */
 				if ((2 == label->scope) &&
 					(2 == label->type)) {
 					params_stack_size++;
-					/* param_stackXXX */
 					/* SP value held in value2 */
 					debug_print(DEBUG_MAIN, 1, "PARAM: Searching for SP(0x%"PRIx64":0x%"PRIx64") + label->value(0x%"PRIx64") - 8\n", inst_log1->value2.init_value, inst_log1->value2.offset_value, label->value);
 				}
