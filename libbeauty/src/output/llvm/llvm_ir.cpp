@@ -811,9 +811,35 @@ int LLVM_ir_export::output(struct self_s *self)
 				}
 			}
 
+#if 0
+			for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+				if ((external_entry_points[l].valid != 0) &&
+					(external_entry_points[l].type == 1)) {
+					Function::arg_iterator args = declaration[l].F->arg_begin();
+					printf("Function: %s()  param_size = 0x%x\n", function_name, external_entry_points[l].params_size);
+					for (m = 0; m < external_entry_points[l].params_reg_ordered_size; m++) {
+						index = external_entry_points[l].params_reg_ordered[m];
+						tmp = label_to_string(&(labels[index]), buffer, 1023);
+						printf("Adding reg param:%s:value index=0x%x\n", buffer, index);
+						args->setName(buffer);
+						args++;
+					}
+					for (m = 0; m < external_entry_points[l].params_stack_ordered_size; m++) {
+						index = external_entry_points[l].params_stack_ordered[m];
+						tmp = label_to_string(&(labels[index]), buffer, 1023);
+						printf("Adding stack param:%s:value index=0x%x\n", buffer, index);
+						args->setName(buffer);
+						args++;
+					}
+					declaration[l].F->dump();
+				}
+			}
+#endif
+
+
 			function_name = external_entry_points[n].name;
 			snprintf(output_filename, 500, "./llvm/%s.bc", function_name);
-
+#if 1
 			Function::arg_iterator args = declaration[n].F->arg_begin();
 			printf("Function: %s()  param_size = 0x%x\n", function_name, external_entry_points[n].params_size);
 			for (m = 0; m < external_entry_points[n].params_reg_ordered_size; m++) {
@@ -834,6 +860,7 @@ int LLVM_ir_export::output(struct self_s *self)
 				value[index]->dump();
 				args++;
 			}
+#endif
 
 			/* Create all the nodes/basic blocks */
 			BasicBlock **bb = (BasicBlock **)calloc(nodes_size + 1, sizeof (BasicBlock *));
