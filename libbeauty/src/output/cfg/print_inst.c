@@ -89,6 +89,12 @@ const char * opcode_table[] = {
 	"LEAVE",  // 0x2D
 	"NOP",  // 0x2E
 	"GEP1",  // 0x2F
+	"CALLM",  // 0x30
+	"SETCC",  // 0x31
+	"JMPM",   // 0x32
+	"MOVS",   // 0x33
+	"IMULD",  // 0x34
+	"TRUNC",  // 0x35
 };
 
 char *store_table[] = { "i", "r", "m", "s" };
@@ -515,6 +521,25 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 		break;
 	case RET:
 		//tmp = snprintf(buffer, 1023, "");
+		ret = 0;
+		break;
+	case TRUNC:
+		if (instruction->srcA.indirect ||
+			(instruction->dstA.indirect)) {
+			ret = 1;
+			break;
+		}
+		tmp = snprintf(buffer, 1023, " %s0x%"PRIx64"/%d,",
+			store_table[instruction->srcA.store],
+			instruction->srcA.index,
+			instruction->srcA.value_size);
+		tmp = string_cat(string, buffer, strlen(buffer));
+
+		tmp = snprintf(buffer, 1023, " %s0x%"PRIx64"/%d",
+			store_table[instruction->dstA.store],
+			instruction->dstA.index,
+			instruction->dstA.value_size);
+		tmp = string_cat(string, buffer, strlen(buffer));
 		ret = 0;
 		break;
 	default:
