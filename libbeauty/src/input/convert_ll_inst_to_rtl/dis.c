@@ -404,7 +404,7 @@ int convert_base(struct self_s *self, struct instruction_low_level_s *ll_inst, i
 			convert_operand(self, ll_inst->address, scale_operand, 2, &(instruction->srcA));
 			convert_operand(self, ll_inst->address, scale_operand, 1, &(instruction->srcB));
 			/* Make the constant multiplier equal in width to the dstA */
-			instruction->srcB.value_size = ll_inst->dstA.size;
+			instruction->srcB.value_size = operand_reg_tmp1.size;
 			convert_operand(self, ll_inst->address, &operand_reg_tmp1, 0, &(instruction->dstA));
 			dis_instructions->instruction_number++;
 			previous_operand = &operand_reg_tmp1;
