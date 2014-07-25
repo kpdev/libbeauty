@@ -1313,7 +1313,7 @@ int fill_phi_node_list(struct self_s *self, struct control_flow_node_s *nodes, i
 						if (nodes[node].phi[n].path_node[l].first_prev_node == nodes[node].phi[n].phi_node[m].first_prev_node) {
 							if ((nodes[node].phi[n].phi_node[m].path_count > 0) &&
 								(nodes[node].phi[n].phi_node[m].node != nodes[node].phi[n].path_node[l].node)) {
-								debug_print(DEBUG_ANALYSE_PHI, "FAILED at node 0x%x, phi_node = 0x%x, path_node = 0x%x\n",
+								debug_print(DEBUG_ANALYSE_PHI, 1, "FAILED at node 0x%x, phi_node = 0x%x, path_node = 0x%x\n",
 									node,
 									nodes[node].phi[n].phi_node[m].node,
 									nodes[node].phi[n].path_node[l].node);
@@ -2485,7 +2485,7 @@ int tip_add(struct self_s *self, int entry_point, int node, int inst, int phi, i
 		label->tip[index].lab_pointer_first = pointer;
 		label->tip[index].lab_integer_first = integer;
 		label->tip[index].lab_size_first = bit_size;
-		printf("tip_add:0x%x:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
+		printf("tip_add:0x%x:0x%lx node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
 			label_index,
 			label_redirect[label_index].redirect,
 			label->tip[index].node,
@@ -4209,7 +4209,7 @@ int call_params_to_locals(struct self_s *self, int entry_point, int node)
 				if ((2 == label->scope) &&
 					(1 == label->type)) {
 					call->params_reg[m] = call->reg_tracker[label->value];
-					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%x --> call_params 0x%x\n", label->value, call->params_reg[m]);
+					debug_print(DEBUG_MAIN, 1, "PARAM: param_reg 0x%lx --> call_params 0x%x\n", label->value, call->params_reg[m]);
 					if (!(call->reg_tracker[label->value])) {
 						printf("ERROR:%s:%d invalid param at node 0x%x, inst 0x%x\n", __FUNCTION__, __LINE__, node, inst);
 						exit(1);
