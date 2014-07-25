@@ -94,7 +94,8 @@ const char * opcode_table[] = {
 	"JMPM",   // 0x32
 	"MOVS",   // 0x33
 	"IMULD",  // 0x34
-	"TRUNC",  // 0x35
+	"MULD",  // 0x35
+	"TRUNC",  // 0x36
 };
 
 char *store_table[] = { "i", "r", "m", "s" };
