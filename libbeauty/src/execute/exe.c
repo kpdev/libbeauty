@@ -1158,24 +1158,43 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		/* Get value of dstA */
 		ret = get_value_RTL_instruction(self, process_state, &(instruction->srcB), &(inst->value2), 1); 
 		/* Create result */
-		debug_print(DEBUG_EXE, 1, "MUL\n");
+		debug_print(DEBUG_EXE, 1, "MUL or IMUL\n");
 		inst->value3.start_address = instruction->dstA.index;
 		inst->value3.length = instruction->dstA.value_size;
 		//inst->value3.length = inst->value1.length;
-		inst->value3.init_value_type = inst->value2.init_value_type;
-		inst->value3.init_value = inst->value2.init_value;
-		inst->value3.offset_value =
-			((inst->value1.offset_value + inst->value1.init_value) 
-			* (inst->value2.offset_value + inst->value2.init_value))
-			 - inst->value1.init_value;
-		inst->value3.value_type = inst->value2.value_type;
-		inst->value3.ref_memory =
-			inst->value2.ref_memory;
-		inst->value3.ref_log =
-			inst->value2.ref_log;
-		inst->value3.value_scope = inst->value2.value_scope;
-		/* Counter */
-		inst->value3.value_id = inst->value2.value_id;
+		/* IF srcA is a IMM, use value2 types, else use value1 types. */
+		if ((instruction->srcA.store == STORE_DIRECT) &&
+			(instruction->srcA.indirect == IND_DIRECT)) {
+			inst->value3.init_value_type = inst->value2.init_value_type;
+			inst->value3.init_value = inst->value2.init_value;
+			inst->value3.offset_value =
+				((inst->value1.offset_value + inst->value1.init_value) 
+				* (inst->value2.offset_value + inst->value2.init_value))
+				 - inst->value1.init_value;
+			inst->value3.value_type = inst->value2.value_type;
+			inst->value3.ref_memory =
+				inst->value2.ref_memory;
+			inst->value3.ref_log =
+				inst->value2.ref_log;
+			inst->value3.value_scope = inst->value2.value_scope;
+			/* Counter */
+			inst->value3.value_id = inst->value2.value_id;
+		} else {
+			inst->value3.init_value_type = inst->value1.init_value_type;
+			inst->value3.init_value = inst->value1.init_value;
+			inst->value3.offset_value =
+				((inst->value1.offset_value + inst->value1.init_value) 
+				* (inst->value2.offset_value + inst->value2.init_value))
+				 - inst->value1.init_value;
+			inst->value3.value_type = inst->value1.value_type;
+			inst->value3.ref_memory =
+				inst->value1.ref_memory;
+			inst->value3.ref_log =
+				inst->value1.ref_log;
+			inst->value3.value_scope = inst->value1.value_scope;
+			/* Counter */
+			inst->value3.value_id = inst->value1.value_id;
+		}
 		/* 1 - Entry Used */
 		inst->value3.valid = 1;
 			debug_print(DEBUG_EXE, 1, "value=0x%"PRIx64"+0x%"PRIx64"=0x%"PRIx64"\n",
