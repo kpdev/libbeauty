@@ -273,7 +273,9 @@ int process_block(struct self_s *self, struct process_state_s *process_state, ui
 						entry[m].eip_offset_value = memory_reg[2].offset_value;
 						entry[m].previous_instuction = inst_log;
 						entry[m].used = 1;
-						debug_print(DEBUG_EXE, 1, "JCD:8 used 1\n");
+						debug_print(DEBUG_EXE, 1, "JCD:8 used 1 EIP: 0x%lx+0x%lx\n",
+							memory_reg[2].init_value,
+							memory_reg[2].offset_value);
 						
 						break;
 					}
@@ -289,7 +291,9 @@ int process_block(struct self_s *self, struct process_state_s *process_state, ui
 						entry[m].eip_offset_value = inst_exe->value3.offset_value;
 						entry[m].previous_instuction = inst_log;
 						entry[m].used = 1;
-						debug_print(DEBUG_EXE, 1, "JCD:8 used 2\n");
+						debug_print(DEBUG_EXE, 1, "JCD:8 used 2 EIP: 0x%lx+0x%lx\n",
+							inst_exe->value3.init_value,
+							inst_exe->value3.offset_value);
 						break;
 					}
 				}
@@ -333,7 +337,7 @@ int process_block(struct self_s *self, struct process_state_s *process_state, ui
 									entry[m].eip_offset_value = relocation_index;
 									entry[m].previous_instuction = inst_log;
 									entry[m].used = 1;
-									debug_print(DEBUG_EXE, 1, "JMPT new entry \n");
+									debug_print(DEBUG_EXE, 1, "JMPT new entry 0x%x:0x%lx\n", m, relocation_index);
 									break;
 								}
 							}
@@ -355,6 +359,10 @@ int process_block(struct self_s *self, struct process_state_s *process_state, ui
 			}
 			if (JMPT == instruction->opcode) {
 				debug_print(DEBUG_EXE, 1, "Function exited. Temporary action for JMPT\n");
+				break;
+			}
+			if (IF == instruction->opcode) {
+				debug_print(DEBUG_EXE, 1, "Function exited. Temporary action for IF\n");
 				break;
 			}
 		}
