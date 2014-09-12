@@ -1774,7 +1774,7 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 				inst->value3.offset_value,
 				inst->value3.init_value +
 					inst->value3.offset_value);
-		put_value_RTL_instruction(self, process_state, inst);
+		// put_value_RTL_instruction(self, process_state, inst);
 		break;
 	case JMP:
 		/* Get value of srcA */
