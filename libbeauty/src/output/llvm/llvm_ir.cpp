@@ -245,6 +245,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
+		srcA->dump();
 		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
@@ -254,6 +255,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
+		srcB->dump();
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = BinaryOperator::Create(Instruction::Mul, srcA, srcB, buffer, bb[node]);
@@ -279,6 +281,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
+		srcA->dump();
 		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
@@ -288,6 +291,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
+		srcB->dump();
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = BinaryOperator::Create(Instruction::Mul, srcA, srcB, buffer, bb[node]);
