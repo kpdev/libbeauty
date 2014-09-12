@@ -254,7 +254,9 @@ int bf_find_relocation_rodata(void *handle_void, uint64_t index, int *relocation
 			print_reloc_table_entry(reloc_table_entry);
 			found = 0;
 			*relocation_area = reloc_table_entry->relocated_area;
-			*relocation_index = reloc_table_entry->symbol_value;
+			/* FIXME: Which of the following should it be? */
+			//*relocation_index = reloc_table_entry->symbol_value;
+			*relocation_index = reloc_table_entry->addend;
 			break;
 		}
 	}
