@@ -2435,7 +2435,7 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 			/* FIXME: TODO*/
 			break;
 		default:
-			debug_print(DEBUG_MAIN, 1, "SSA1 failed for Inst:0x%x:0x%04x, OP 0x%x\n",
+			debug_print(DEBUG_MAIN, 1, "SSA1 failed for entry point 0x%x, Inst:0x%x:0x%04x, OP 0x%x\n",
 				entry_point, node, inst, instruction->opcode);
 			exit(1);
 			return 1;
@@ -2666,7 +2666,7 @@ exit1:
 	return ret;
 }
 
-int process_tip_label(struct self_s *self, int entry_point, int label_index)
+int tip_process_label(struct self_s *self, int entry_point, int label_index)
 {
 	struct external_entry_point_s *external_entry_point = &(self->external_entry_points[entry_point]);
 	struct control_flow_node_s *nodes = external_entry_point->nodes;
@@ -2692,7 +2692,40 @@ int process_tip_label(struct self_s *self, int entry_point, int label_index)
 	return 0;
 }
 
-int print_tip_label(struct self_s *self, int entry_point, int label_index)
+int tip_add_zext(struct self_s *self, int entry_point, int label_index)
+{
+	struct external_entry_point_s *external_entry_point = &(self->external_entry_points[entry_point]);
+	struct control_flow_node_s *nodes = external_entry_point->nodes;
+	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
+	struct label_redirect_s *label_redirect = external_entry_point->label_redirect;
+	struct label_s *labels = external_entry_point->labels;
+	struct inst_log_entry_s *inst_log1;
+	struct instruction_s *instruction;
+	struct label_s *label;
+	int n;
+
+	label = &labels[label_redirect[label_index].redirect];
+	if ((label->scope != 0) && (label->tip_size > 0) &&
+		(label_redirect[label_index].redirect == label_index)) {
+		for (n = 0; n < label->tip_size; n++) {
+			printf("label tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
+			label_index,
+			label->tip[n].node,
+			label->tip[n].inst_number,
+			label->tip[n].phi_number,
+			label->tip[n].operand,
+			label->tip[n].lab_pointer_first,
+			label->tip[n].lab_integer_first,
+			label->tip[n].lab_size_first);
+		}
+	}
+	return 0;
+}
+
+
+
+
+int tip_print_label(struct self_s *self, int entry_point, int label_index)
 {
 	struct external_entry_point_s *external_entry_point = &(self->external_entry_points[entry_point]);
 	struct control_flow_node_s *nodes = external_entry_point->nodes;
@@ -5234,7 +5267,7 @@ int main(int argc, char *argv[])
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
 			for(n = 1; n < external_entry_points[l].variable_id; n++) {
-				tmp = process_tip_label(self, l, n);
+				tmp = tip_process_label(self, l, n);
 			}
 		}
 	}
@@ -5242,7 +5275,7 @@ int main(int argc, char *argv[])
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
 			for(n = 1; n < external_entry_points[l].variable_id; n++) {
-				tmp = print_tip_label(self, l, n);
+				tmp = tip_print_label(self, l, n);
 			}
 		}
 	}
@@ -5848,7 +5881,7 @@ int main(int argc, char *argv[])
 				for (n = 0; n < external_entry_points[l].params_size; n++) {
 					uint64_t tmp_param;
 					tmp_param = external_entry_points[l].params[n];
-					debug_print(DEBUG_MAIN, 1, "JCD5: labels 0x%x, params_size=%d\n", tmp_param, external_entry_points[l].params_size);
+					debug_print(DEBUG_MAIN, 1, "JCD5: labels 0x%lx, params_size=%d\n", tmp_param, external_entry_points[l].params_size);
 					/* Sanity check */
 					if (tmp_param >= external_entry_points[l].variable_id) {
 						debug_print(DEBUG_MAIN, 1, "Invalid entry point 0x%x, l=%d, m=%d, n=%d, params_size=%d\n",
