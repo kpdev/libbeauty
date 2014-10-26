@@ -96,6 +96,7 @@ const char * opcode_table[] = {
 	"IMULD",  // 0x34
 	"MULD",  // 0x35
 	"TRUNC",  // 0x36
+	"ZEXT",  // 0x37
 };
 
 char *store_table[] = { "i", "r", "m", "s" };
@@ -137,6 +138,7 @@ int write_inst(struct self_s *self, struct string_s *string, struct instruction_
 	switch (instruction->opcode) {
 	case MOV:
 	case SEX:
+	case ZEXT:
 		if (instruction->srcA.indirect ||
 			(instruction->dstA.indirect)) {
 			ret = 1;

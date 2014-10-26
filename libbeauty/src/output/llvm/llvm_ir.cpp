@@ -619,6 +619,31 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		dstA->dump();
 		value[inst_log1->value3.value_id] = dstA;
 		break;
+
+	case 0x37:  // ZEXT
+		printf("LLVM 0x%x: OPCODE = 0x%x:ZEXT\n", inst, inst_log1->instruction.opcode);
+		printf("value_id1 = 0x%lx->0x%lx, value_id3 = 0x%lx->0x%lx\n",
+			inst_log1->value1.value_id,
+			external_entry_point->label_redirect[inst_log1->value1.value_id].redirect,
+			inst_log1->value3.value_id,
+			external_entry_point->label_redirect[inst_log1->value3.value_id].redirect);
+		value_id = external_entry_point->label_redirect[inst_log1->value1.value_id].redirect;
+		if (!value[value_id]) {
+			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+			if (tmp) {
+				printf("failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				exit(1);
+			}
+		}
+		srcA = value[value_id];
+		value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
+		label = &external_entry_point->labels[value_id_dst];
+		tmp = label_to_string(label, buffer, 1023);
+		printf("label->size_bits = 0x%lx\n", label->size_bits);
+		dstA = new ZExtInst(srcA, IntegerType::get(mod->getContext(), label->size_bits), buffer, bb[node]);
+		value[value_id_dst] = dstA;
+		break;
+
 	default:
 		printf("LLVM 0x%x: OPCODE = 0x%x. Not yet handled.\n", inst, inst_log1->instruction.opcode);
 		exit(1);

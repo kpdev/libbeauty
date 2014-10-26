@@ -1903,6 +1903,8 @@ int scan_for_labels_in_function_body(struct self_s *self, int entry_point_index)
 			switch (instruction->opcode) {
 			case MOV:
 			case SEX:
+			case ZEXT:
+				debug_print(DEBUG_ANALYSE, 1, "MOV, SEX or ZEXT\n");
 				value_id = inst_log1->value1.value_id;
 				debug_print(DEBUG_ANALYSE, 1, "value1\n");
 				tmp = register_label(entry_point, inst, 1, value_id, inst_log_entry, label_redirect, labels);

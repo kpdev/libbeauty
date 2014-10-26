@@ -802,6 +802,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 			break;
 		case MOV:
 		case SEX:
+		case ZEXT:
 			if (inst_log1->value1.value_type == 6) {
 				debug_print(DEBUG_OUTPUT, 1, "ERROR1 %d\n", instruction->opcode);
 				//break;

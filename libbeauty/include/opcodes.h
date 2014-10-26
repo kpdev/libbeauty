@@ -98,6 +98,7 @@ enum {
 #define IMULD 0x34 /* IMULD special instruction to be expanded to SEX,SEX,MUL, LSHR, TRUNC, TRUNC */
 #define MULD 0x35 /* MULD special instruction to be expanded to USEX,USEX,MUL, LSHR, TRUNC, TRUNC */
 #define TRUNC 0x36 /* Truncate from large number of bits to smaller number of bits. */
+#define ZEXT 0x37 /* Zero Extention */
 
 #define FLAG_NONE 0
 #define FLAG_OVERFLOW 1
