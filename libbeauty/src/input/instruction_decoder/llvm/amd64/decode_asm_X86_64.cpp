@@ -113,8 +113,7 @@ int DecodeAsmX86_64::setup() {
 		return 1;
 
 	// Set up disassembler.
-	//DisAsm = TheTarget->createMCDisassembler(*STI, *Ctx);
-	DisAsm = TheTarget->createMCDisassembler(*STI);
+	DisAsm = TheTarget->createMCDisassembler(*STI, *Ctx);
 	if (!DisAsm)
 		return 1;
 
