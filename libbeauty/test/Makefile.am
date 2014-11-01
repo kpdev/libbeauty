@@ -8,8 +8,8 @@ AM_CXXFLAGS = -I$(top_srcdir)/test -I/usr/local/include/llvm-c -I/usr/local/incl
 #bin_PROGRAMS = dis32 dis64 bf
 #noinst_PROGRAMS = dis64 test_id test_id_arm mem test_case
 #noinst_PROGRAMS = dis64 test_id test_case build_reg_table
-#noinst_PROGRAMS = dis64 test_id test_case 
-noinst_PROGRAMS = dis64
+noinst_PROGRAMS = dis64 test_id test_case 
+#noinst_PROGRAMS = dis64 test_case
 
 #noinst_HEADERS = \
 #	dis.h \
@@ -55,14 +55,18 @@ dis64_LDADD = -L$(libdir) -L/usr/lib/llvm-3.5/lib -lbeauty_input_bfd -lbeauty_de
 #		-lLLVMBitWriter -lLLVMCore -lLLVMSupport \
 #		-lstdc++ -lz -lm -ldl -lpthread -lncurses
 #test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
-test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.5 -L/usr/lib/llvm-3.5/lib 
+test_id_LDADD = -L$(libdir) -L/usr/lib/llvm-3.5/lib -lbeauty_input_bfd -lbeauty_decoder_llvm_amd64  \
+		-lbeauty_ll_inst_to_rtl -lbeauty_output_cfg -lz -ldl -lLLVM-3.5
+
 #test_id_LDADD = -L/usr/local/lib -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
 #		-lLLVMMCDisassembler -lLLVMX86Disassembler -lbeauty_input_bfd \
 #		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl -lbeauty_output_cfg \
 #		-L/usr/local/lib -lstdc++ 
 #test_id_arm_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.4svn -lbeauty_output -L/usr/local/lib/llvm/lib -lstdc++
-test_case_LDADD = -L/usr/local/lib -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
-		 -lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMSupport -L/usr/local/lib/ -lstdc++
+#test_case_LDADD = -L/usr/local/lib -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
+#		 -lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMSupport -L/usr/local/lib/ -lstdc++
+test_case_LDADD = -L$(libdir) -L/usr/lib/llvm-3.5/lib -lz -ldl -lLLVM-3.5 -lstdc++
+
 #build_reg_table_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.5svn -L/usr/local/lib/ -lstdc++
 #mem_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
 
