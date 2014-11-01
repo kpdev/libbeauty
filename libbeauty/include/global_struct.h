@@ -172,6 +172,7 @@ struct tip_s {
 	int phi_number; /* Number of the phi */
 	int operand; /* Which operand of the instruction? 1 = srcA/value1, 2 = srcB/value2, 3 = dstA/value3 */
 	int lab_pointer_first;  /* Is this a pointer. Determined from the LOAD or STORE command */
+	int lab_pointed_to_size; /* Is the size of the pointed to value */
 	int lab_pointer_inferred; /* This has been inferred from another label. */
 	int lab_size_first; /* Bit width of the label */
 	int lab_size_inferred;

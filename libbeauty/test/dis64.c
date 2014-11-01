@@ -2760,23 +2760,27 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 	if ((label->scope != 0) && (label->tip_size > 1) &&
 		(label_redirect[label_index].redirect == label_index)) {
 		int size = label->tip[0].lab_size_first;
-		int new_inst;
+		int inst_new;
+		int inst_modified;
+		int operand_modified;
 		for (n = 1; n < label->tip_size; n++) {
 			if (label->tip[n].lab_size_first != size) {
-				if (inst_log_entry[label->tip[n].inst_number].instruction.opcode == RET) {
+				inst_modified = label->tip[n].inst_number;
+				operand_modified = label->tip[n].operand;
+				if (inst_log_entry[inst_modified].instruction.opcode == RET) {
 					return 0;
 				}
-				tmp = insert_nop_before(self, label->tip[n].inst_number, &new_inst);
+				tmp = insert_nop_before(self, inst_modified, &inst_new);
 				if (label->tip[n].lab_size_first > size) {
-					inst_log_entry[new_inst].instruction.opcode = ZEXT;
+					inst_log_entry[inst_new].instruction.opcode = ZEXT;
 				} else {
-					inst_log_entry[new_inst].instruction.opcode = TRUNC;
+					inst_log_entry[inst_new].instruction.opcode = TRUNC;
 				}
-				inst_log_entry[new_inst].instruction.flags = 0;
+				inst_log_entry[inst_new].instruction.flags = 0;
 
-				printf("label needed zext: size=0x%x, new_inst=0x%x. tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
+				printf("label needed zext: size=0x%x, inst_new=0x%x. tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
 				size,
-				new_inst,
+				inst_new,
 				label_index,
 				label->tip[n].node,
 				label->tip[n].inst_number,
@@ -2785,25 +2789,25 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 				label->tip[n].lab_pointer_first,
 				label->tip[n].lab_integer_first,
 				label->tip[n].lab_size_first);
-				tmp = copy_operand(self, label->tip[n].inst_number, label->tip[n].operand, new_inst, 1, size);
-				tmp = copy_operand(self, label->tip[n].inst_number, label->tip[n].operand, new_inst, 3, size);
+				tmp = copy_operand(self, inst_modified, operand_modified, inst_new, 1, size);
+				tmp = copy_operand(self, inst_modified, operand_modified, inst_new, 3, size);
 				/* FIXME: Not support LOAD or STORE inst yet. */
-				inst_log_entry[new_inst].instruction.srcA.value_size = size;
-				inst_log_entry[new_inst].instruction.dstA.index = REG_TMP3;
-				inst_log_entry[new_inst].value3.value_id =
+				inst_log_entry[inst_new].instruction.srcA.value_size = size;
+				inst_log_entry[inst_new].instruction.dstA.index = REG_TMP3;
+				inst_log_entry[inst_new].value3.value_id =
 					external_entry_point->variable_id;
-				if (label->tip[n].operand == 1) {
-					inst_log_entry[label->tip[n].inst_number].instruction.srcA.index = REG_TMP3;
-				} else if (label->tip[n].operand == 2) {
-					inst_log_entry[label->tip[n].inst_number].instruction.srcB.index = REG_TMP3;
-				} else if (label->tip[n].operand == 3) {
-					inst_log_entry[label->tip[n].inst_number].instruction.dstA.index = REG_TMP3;
+				if (operand_modified == 1) {
+					inst_log_entry[inst_modified].instruction.srcA.index = REG_TMP3;
+				} else if (operand_modified == 2) {
+					inst_log_entry[inst_modified].instruction.srcB.index = REG_TMP3;
+				} else if (operand_modified == 3) {
+					inst_log_entry[inst_modified].instruction.dstA.index = REG_TMP3;
 				} else {
 					printf("operand out of range.\n");
 					exit(1);
 				}
-				inst_log1 =  &inst_log_entry[new_inst];
-				tmp  = assign_id_label_dst(self, entry_point, new_inst, inst_log1, &label_local);
+				inst_log1 =  &inst_log_entry[inst_new];
+				tmp  = assign_id_label_dst(self, entry_point, inst_new, inst_log1, &label_local);
 				if (!tmp) {
 					variable_id = external_entry_point->variable_id;
 					debug_print(DEBUG_MAIN, 1, "variable_id = %x\n", variable_id);
@@ -2822,16 +2826,16 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 					debug_print(DEBUG_MAIN, 1, "variable_id increased to = %x\n", variable_id);
 				} else {
 					debug_print(DEBUG_MAIN, 1, "ERROR: assign_id_label_dst() failed. entry_point = 0x%x, inst = 0x%x\n",
-						entry_point, new_inst);
+						entry_point, inst_new);
 					exit(1);
 				}
 				variable_id--;
-				if (label->tip[n].operand == 1) {
-					inst_log_entry[label->tip[n].inst_number].value1.value_id = variable_id;
-				} else if (label->tip[n].operand == 2) {
-					inst_log_entry[label->tip[n].inst_number].value2.value_id = variable_id;
-				} else if (label->tip[n].operand == 3) {
-					inst_log_entry[label->tip[n].inst_number].value3.value_id = variable_id;
+				if (operand_modified == 1) {
+					inst_log_entry[inst_modified].value1.value_id = variable_id;
+				} else if (operand_modified == 2) {
+					inst_log_entry[inst_modified].value2.value_id = variable_id;
+				} else if (operand_modified == 3) {
+					inst_log_entry[inst_modified].value3.value_id = variable_id;
 				} else {
 					printf("operand out of range.\n");
 					exit(1);
