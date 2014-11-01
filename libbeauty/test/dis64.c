@@ -2735,7 +2735,11 @@ int insert_nop_after(struct self_s *self, int inst, int *new_inst);
 
 /* This searches the tip list and discovers:
    If a label is used with different bit widths by different instructions, add a zext
-   so that the label can be split into two, and thus no consist of multi-bit-size instructions.
+   so that the label can be split into two, and thus not consist of multi-bit-size instructions.
+ */
+/* FIXME: Update the tip to point to the new inst.
+          Update the label on the new instruction to include a tip for the
+          new inst, the REG_TMP3 and its label.
  */
 int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 {
