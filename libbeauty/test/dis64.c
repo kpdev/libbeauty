@@ -2737,10 +2737,6 @@ int insert_nop_after(struct self_s *self, int inst, int *new_inst);
    If a label is used with different bit widths by different instructions, add a zext
    so that the label can be split into two, and thus not consist of multi-bit-size instructions.
  */
-/* FIXME: Update the tip to point to the new inst.
-          Update the label on the new instruction to include a tip for the
-          new inst, the REG_TMP3 and its label.
- */
 int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 {
 	struct external_entry_point_s *external_entry_point = &(self->external_entry_points[entry_point]);
@@ -2755,6 +2751,8 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 	int n;
 	int tmp;
 	int variable_id;
+	int variable_id_add_tip;
+	int node;
 
 	label = &labels[label_redirect[label_index].redirect];
 	if ((label->scope != 0) && (label->tip_size > 1) &&
@@ -2767,6 +2765,7 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 			if (label->tip[n].lab_size_first != size) {
 				inst_modified = label->tip[n].inst_number;
 				operand_modified = label->tip[n].operand;
+				node = label->tip[n].node;
 				if (inst_log_entry[inst_modified].instruction.opcode == RET) {
 					return 0;
 				}
@@ -2808,8 +2807,9 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 				}
 				inst_log1 =  &inst_log_entry[inst_new];
 				tmp  = assign_id_label_dst(self, entry_point, inst_new, inst_log1, &label_local);
+				variable_id = external_entry_point->variable_id;
+				variable_id_add_tip = variable_id;
 				if (!tmp) {
-					variable_id = external_entry_point->variable_id;
 					debug_print(DEBUG_MAIN, 1, "variable_id = %x\n", variable_id);
 					if (variable_id >= 10000) {
 						debug_print(DEBUG_MAIN, 1, "ERROR: variable_id overrun 10000 limit. Trying to write to %d\n", variable_id);
@@ -2829,17 +2829,28 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 						entry_point, inst_new);
 					exit(1);
 				}
-				variable_id--;
 				if (operand_modified == 1) {
-					inst_log_entry[inst_modified].value1.value_id = variable_id;
+					inst_log_entry[inst_modified].value1.value_id = variable_id_add_tip;
 				} else if (operand_modified == 2) {
-					inst_log_entry[inst_modified].value2.value_id = variable_id;
+					inst_log_entry[inst_modified].value2.value_id = variable_id_add_tip;
 				} else if (operand_modified == 3) {
-					inst_log_entry[inst_modified].value3.value_id = variable_id;
+					inst_log_entry[inst_modified].value3.value_id = variable_id_add_tip;
 				} else {
 					printf("operand out of range.\n");
 					exit(1);
 				}
+				/* Now update the tip table with the changes */
+				/* Update the tip to point to the new inst.
+				   Update the label on the new instruction to include a tip for the
+				   new inst, the REG_TMP3 and its label.
+				*/
+				tmp = tip_add(self, entry_point, node, inst_new, 0, 1, variable_id_add_tip,
+					label->tip[n].lab_pointer_first, 0, label->tip[n].lab_size_first);
+				tmp = tip_add(self, entry_point, node, inst_modified, 0, 1, variable_id_add_tip,
+					label->tip[n].lab_pointer_first, 0, label->tip[n].lab_size_first);
+				label->tip[n].inst_number = inst_new;
+				label->tip[n].operand = 1;
+				label->tip[n].lab_size_first = size;
 			}
 		}
 	}
