@@ -3745,7 +3745,8 @@ int insert_nop_before(struct self_s *self, int inst, int *new_inst)
 	self->flag_dependency_opcode[inst_log - 1] = 0;
 	self->flag_result_users = realloc(self->flag_result_users, (inst_log) * sizeof(int));
 	self->flag_result_users[inst_log - 1] = 0;
-	debug_print(DEBUG_MAIN, 1, "INFO: Insert nop before: Old dep size = 0x%x, new dep size = 0x%"PRIx64"\n", self->flag_dependency_size, inst_log);
+	debug_print(DEBUG_MAIN, 1, "INFO: Insert nop before inst 0x%x: Old dep size = 0x%x, new dep size = 0x%"PRIx64"\n",
+		inst, self->flag_dependency_size, inst_log);
 	debug_print(DEBUG_MAIN, 1, "INFO: Setting flag_result_users[0x%"PRIx64"] = 0\n", inst_log - 1);
 	self->flag_dependency_size = inst_log;
 
