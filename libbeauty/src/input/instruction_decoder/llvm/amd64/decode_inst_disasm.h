@@ -17,11 +17,11 @@
 #ifndef LLVM_DECODE_DIS_H
 #define LLVM_DECODE_DIS_H
 
-#include "llvm-c/Disassembler.h"
+//#include "llvm-c/Disassembler.h"
 #include <string>
-#include "llvm/ADT/OwningPtr.h"
-#include "llvm/ADT/SmallString.h"
-#include "llvm/Support/raw_ostream.h"
+#include <llvm-3.5/llvm/ADT/OwningPtr.h>
+#include <llvm-3.5/llvm/ADT/SmallString.h>
+#include <llvm-3.5/llvm/Support/raw_ostream.h>
 
 namespace llvm {
 class MCContext;

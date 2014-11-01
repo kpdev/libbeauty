@@ -3,21 +3,21 @@
 #define __STDC_CONSTANT_MACROS
 
 #include <stdarg.h>
-#include "llvm/MC/MCAsmInfo.h"
-#include "llvm/MC/MCContext.h"
-#include "llvm/MC/MCDisassembler.h"
-#include "llvm/MC/MCInst.h"
-#include "llvm/MC/MCInstPrinter.h"
-#include "llvm/MC/MCInstrInfo.h"
-#include "llvm/MC/MCRegisterInfo.h"
-#include "llvm/MC/MCSubtargetInfo.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/MemoryObject.h"
-#include "llvm/Support/TargetRegistry.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Debug.h"
+#include <llvm/MC/MCAsmInfo.h>
+#include <llvm/MC/MCContext.h>
+#include <llvm/MC/MCDisassembler.h>
+#include <llvm/MC/MCInst.h>
+#include <llvm/MC/MCInstPrinter.h>
+#include <llvm/MC/MCInstrInfo.h>
+#include <llvm/MC/MCRegisterInfo.h>
+#include <llvm/MC/MCSubtargetInfo.h>
+#include <llvm/Support/Format.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/MemoryObject.h>
+#include <llvm/Support/TargetRegistry.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Support/ErrorHandling.h>
+#include <llvm/Support/Debug.h>
 
 #include "X86BaseInfo.h"
 #include "instruction_low_level.h"
@@ -113,7 +113,8 @@ int DecodeAsmX86_64::setup() {
 		return 1;
 
 	// Set up disassembler.
-	DisAsm = TheTarget->createMCDisassembler(*STI, *Ctx);
+	//DisAsm = TheTarget->createMCDisassembler(*STI, *Ctx);
+	DisAsm = TheTarget->createMCDisassembler(*STI);
 	if (!DisAsm)
 		return 1;
 
@@ -124,7 +125,7 @@ int DecodeAsmX86_64::setup() {
 
 	std::unique_ptr<MCSymbolizer> Symbolizer(TheTarget->createMCSymbolizer(
 		TripleName, GetOpInfo, SymbolLookUp, DisInfo, Ctx, RelInfo.release()));
-	DisAsm->setSymbolizer(std::move(Symbolizer));
+	//DisAsm->setSymbolizer(std::move(Symbolizer));
 	//DisAsm->setupForSymbolicDisassembly(GetOpInfo, SymbolLookUp, DisInfo, Ctx, RelInfo);
 
 	// Set up the instruction printer.

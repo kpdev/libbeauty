@@ -1,21 +1,21 @@
 
 //#include <llvm-c/Disassembler.h>
 
-#include "llvm/MC/MCAsmInfo.h"
-#include "llvm/MC/MCContext.h"
-#include "llvm/MC/MCDisassembler.h"
-#include "llvm/MC/MCInst.h"
-#include "llvm/MC/MCInstPrinter.h"
-#include "llvm/MC/MCInstrInfo.h"
-#include "llvm/MC/MCRegisterInfo.h"
-#include "llvm/MC/MCSubtargetInfo.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/MemoryObject.h"
-#include "llvm/Support/TargetRegistry.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/Debug.h"
+#include <llvm-3.5/llvm/MC/MCAsmInfo.h>
+#include <llvm-3.5/llvm/MC/MCContext.h>
+#include <llvm-3.5/llvm/MC/MCDisassembler.h>
+#include <llvm-3.5/llvm/MC/MCInst.h>
+#include <llvm-3.5/llvm/MC/MCInstPrinter.h>
+#include <llvm-3.5/llvm/MC/MCInstrInfo.h>
+#include <llvm-3.5/llvm/MC/MCRegisterInfo.h>
+#include <llvm-3.5/llvm/MC/MCSubtargetInfo.h>
+#include <llvm-3.5/llvm/Support/Format.h>
+#include <llvm-3.5/llvm/Support/raw_ostream.h>
+#include <llvm-3.5/llvm/Support/MemoryObject.h>
+#include <llvm-3.5/llvm/Support/TargetRegistry.h>
+#include <llvm-3.5/llvm/Support/TargetSelect.h>
+#include <llvm-3.5/llvm/Support/ErrorHandling.h>
+#include <llvm-3.5/llvm/Support/Debug.h>
 
 #include "X86BaseInfo.h"
 #include "decode_inst.h"

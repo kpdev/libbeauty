@@ -41,9 +41,9 @@ dnl ------------------------------------
 dnl Flag setup
 dnl ------------------------------------
 
-INCLUDES="-I\$(top_srcdir)/include"
+AM_CPPFLAGS="-I\$(top_srcdir)/include -I/usr/include/llvm-3.5 -I/usr/include/llvm-c-3.5"
 
-CXXFLAGS="-O0 -Wall -g3"
+CXXFLAGS="-O0 -Wall -g3 -std=c++11"
 DEBUG_CXXFLAGS="-g3 -Wall"
 
 if test "$CXX" = "cxx"; then
@@ -53,7 +53,7 @@ fi
 
 MODULE_LDFLAGS="-export-dynamic -module -avoid-version"
 
-AC_SUBST(INCLUDES)
+AC_SUBST(AM_CPPFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(DEBUG_CXXFLAGS)
 AC_SUBST(MODULE_LDFLAGS)

@@ -8,8 +8,8 @@ AM_CXXFLAGS = -I$(top_srcdir)/test -I/usr/local/include/llvm-c -I/usr/local/incl
 #bin_PROGRAMS = dis32 dis64 bf
 #noinst_PROGRAMS = dis64 test_id test_id_arm mem test_case
 #noinst_PROGRAMS = dis64 test_id test_case build_reg_table
-noinst_PROGRAMS = dis64 test_id test_case 
-#noinst_PROGRAMS = dis64 test_case
+#noinst_PROGRAMS = dis64 test_id test_case 
+noinst_PROGRAMS = dis64
 
 #noinst_HEADERS = \
 #	dis.h \
@@ -41,25 +41,25 @@ test_case_SOURCES = \
 #	mem.cpp
 
 #dis64_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lopcodes -liberty -lbeauty_exe -lbeauty_analyse -lbeauty_output -lbeauty_llvm -lbfd -lz -ldl
-#dis64_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lbeauty_exe \
-#		-lbeauty_analyse -lbeauty_output_cfg -lbeauty_output_llvm \
-#		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl \
-#		-lLLVM-3.5svn \
-#		-lstdc++ -lz -lm -ldl -lpthread -lncurses
-dis64_LDADD = -L/usr/local/lib -lbeauty_input_bfd -lbeauty_decoder_amd64 -lbeauty_exe \
+dis64_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lbeauty_exe \
 		-lbeauty_analyse -lbeauty_output_cfg -lbeauty_output_llvm \
 		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl \
-		-lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
-		-lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMX86Desc \
-		-lLLVMMC -lLLVMMCParser -lLLVMX86AsmPrinter -lLLVMObject -lLLVMX86Utils \
-		-lLLVMBitWriter -lLLVMCore -lLLVMSupport \
+		-lLLVM-3.5 \
 		-lstdc++ -lz -lm -ldl -lpthread -lncurses
+#dis64_LDADD = -L/usr/local/lib -lbeauty_input_bfd -lbeauty_decoder_amd64 -lbeauty_exe \
+#		-lbeauty_analyse -lbeauty_output_cfg -lbeauty_output_llvm \
+#		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl \
+#		-lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
+#		-lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMX86Desc \
+#		-lLLVMMC -lLLVMMCParser -lLLVMX86AsmPrinter -lLLVMObject -lLLVMX86Utils \
+#		-lLLVMBitWriter -lLLVMCore -lLLVMSupport \
+#		-lstdc++ -lz -lm -ldl -lpthread -lncurses
 #test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
-#test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.2 -L/usr/lib/llvm-3.2/lib -lstdc++
-test_id_LDADD = -L/usr/local/lib -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
-		-lLLVMMCDisassembler -lLLVMX86Disassembler -lbeauty_input_bfd \
-		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl -lbeauty_output_cfg \
-		-L/usr/local/lib -lstdc++ 
+test_id_LDADD = -L$(libdir) -lbeauty_input_bfd -lbeauty_decoder_amd64 -lz -ldl -lLLVM-3.5 -L/usr/lib/llvm-3.5/lib 
+#test_id_LDADD = -L/usr/local/lib -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
+#		-lLLVMMCDisassembler -lLLVMX86Disassembler -lbeauty_input_bfd \
+#		-lbeauty_decoder_llvm_amd64 -lbeauty_ll_inst_to_rtl -lbeauty_output_cfg \
+#		-L/usr/local/lib -lstdc++ 
 #test_id_arm_LDADD = -L$(libdir) -lz -ldl -lLLVM-3.4svn -lbeauty_output -L/usr/local/lib/llvm/lib -lstdc++
 test_case_LDADD = -L/usr/local/lib -lz -ldl -lLLVMX86AsmParser -lLLVMX86Desc -lLLVMX86Info \
 		 -lLLVMMCDisassembler -lLLVMX86Disassembler -lLLVMSupport -L/usr/local/lib/ -lstdc++
