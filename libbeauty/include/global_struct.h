@@ -189,7 +189,7 @@ struct label_redirect_s {
 };
 
 struct label_s {
-	/* local = 1, param = 2, data = 3, mem = 4, sp_bp = 5, constand = 6 */
+	/* local = 1, param = 2, data = 3, mem = 4, sp_bp = 5, constant = 6 */
 	uint64_t scope;
 	/* For local or param: reg = 1, stack = 2 */
 	/* For data: data = 1, &data = 2, value = 3 */
