@@ -59,6 +59,22 @@
 #include "decode_inst.h"
 #include <dis.h>
 #include <convert_ll_inst_to_rtl.h>
+#include <execinfo.h>
+
+void stack_trace()
+{
+	void *trace[16];
+	char **messages = (char **)NULL;
+	int i, trace_size = 0;
+
+	trace_size = backtrace(trace, 16);
+	messages = backtrace_symbols(trace, trace_size);
+	printf("[stack trace]>>>\n");
+	for (i=0; i < trace_size; i++)
+		printf("%s\n", messages[i]);
+	printf("<<<[stack trace]\n");
+	free(messages);
+}
 
 #define EIP_START 0x40000000
 
@@ -2693,7 +2709,7 @@ int tip_process_label(struct self_s *self, int entry_point, int label_index)
 }
 
 
-int copy_operand(struct self_s *self, int inst_from, int operand_from, int inst_to, int operand_to, int size)
+int dis64_copy_operand(struct self_s *self, int inst_from, int operand_from, int inst_to, int operand_to, int size)
 {
 	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
 	struct operand_s operand;
@@ -2710,8 +2726,9 @@ int copy_operand(struct self_s *self, int inst_from, int operand_from, int inst_
 		memcpy(&operand, &(inst_log_entry[inst_from].instruction.dstA), sizeof(struct operand_s));
 		memcpy(&value, &(inst_log_entry[inst_from].value3), sizeof(struct memory_s));
 	} else {
-		printf("Unknown operand\n");
-		exit(1);
+		printf("dis64_copy_operand: Unknown operand_from 0x%x. Out of range\n", operand_from);
+		stack_trace();
+		abort();
 	}
 	if (operand_to == 1) {
 		memcpy(&(inst_log_entry[inst_to].instruction.srcA), &operand, sizeof(struct operand_s));
@@ -2723,8 +2740,9 @@ int copy_operand(struct self_s *self, int inst_from, int operand_from, int inst_
 		memcpy(&(inst_log_entry[inst_to].instruction.dstA), &operand, sizeof(struct operand_s));
 		memcpy(&(inst_log_entry[inst_to].value3), &value, sizeof(struct memory_s));
 	} else {
-		printf("Unknown operand\n");
-		exit(1);
+		printf("dis64_copy_operand: Unknown operand_to 0x%x. Out of range\n", operand_to);
+		stack_trace();
+		abort();
 	}
 
 	return 0;
@@ -2788,8 +2806,8 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 				label->tip[n].lab_pointer_first,
 				label->tip[n].lab_integer_first,
 				label->tip[n].lab_size_first);
-				tmp = copy_operand(self, inst_modified, operand_modified, inst_new, 1, size);
-				tmp = copy_operand(self, inst_modified, operand_modified, inst_new, 3, size);
+				tmp = dis64_copy_operand(self, inst_modified, operand_modified, inst_new, 1, size);
+				tmp = dis64_copy_operand(self, inst_modified, operand_modified, inst_new, 3, size);
 				/* FIXME: Not support LOAD or STORE inst yet. */
 				inst_log_entry[inst_new].instruction.srcA.value_size = size;
 				inst_log_entry[inst_new].instruction.dstA.index = REG_TMP3;
