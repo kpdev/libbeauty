@@ -236,7 +236,7 @@ static int get_value_RTL_instruction(
 			destination->ref_log = 0;
 			/* unknown */
 			/* FIXME: Do we need a special value for this. E.g. for CONSTANT */
-			destination->value_scope = 0;
+			destination->value_scope = 4; /* CONSTANT */
 			/* 1 - Entry Used */
 			destination->value_id = 0;
 			destination->valid = 1;
@@ -410,7 +410,7 @@ static int get_value_RTL_instruction(
 			value = add_new_store(memory_reg,
 					source->index,
 					source->indirect_size);
-			value->value_id = 0;
+			if (value) value->value_id = 0;
 		}
 		if (!value) {
 			debug_print(DEBUG_EXE, 1, "GET CASE2:STORE_REG ERROR!\n");
@@ -1130,6 +1130,10 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 		inst->value3.ref_log =
 			inst->value1.ref_log;
 		inst->value3.value_scope = inst->value1.value_scope;
+		if (inst->value3.value_scope == 0) {
+			debug_print(DEBUG_EXE, 1, "ERROR: value_scope == 0, BAD\n");
+			exit(1);
+		}
 		/* Counter */
 		inst->value3.value_id = inst->value1.value_id;
 		/* 1 - Entry Used */

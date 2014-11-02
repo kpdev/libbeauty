@@ -2586,7 +2586,7 @@ int build_tip_table(struct self_s *self, int entry_point, int node)
 			is_pointer2 = 0;
 			value_id = inst_log1->value1.value_id;
 			if (value_id == 3) is_pointer1 = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, instruction->srcA.value_size);
+			//tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, instruction->srcA.value_size);
 			value_id = inst_log1->value2.value_id;
 			if (value_id == 3) is_pointer2 = 1;
 			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, 1, 0, instruction->srcB.value_size);

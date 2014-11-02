@@ -189,7 +189,7 @@ struct label_redirect_s {
 };
 
 struct label_s {
-	/* local = 1, param = 2, data = 3, mem = 4, sp_bp = 5 */
+	/* local = 1, param = 2, data = 3, mem = 4, sp_bp = 5, constand = 6 */
 	uint64_t scope;
 	/* For local or param: reg = 1, stack = 2 */
 	/* For data: data = 1, &data = 2, value = 3 */
@@ -346,7 +346,7 @@ struct memory_s {
 	uint32_t ref_memory;
 	/* last_accessed_from_instruction_log_at_location */
 	uint32_t ref_log;
-	/* value_scope: 0 - unknown, 1 - Param, 2 - Local, 3 - Global */
+	/* value_scope: 0 - unknown, 1 - Param, 2 - Local, 3 - Global, 4 - Constant */
 	int value_scope;
 	/* Each time a new value is assigned, this value_id increases */
 	uint64_t value_id;
