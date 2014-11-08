@@ -9,3 +9,5 @@ export ENABLE_DEBUG_OUTPUT=1
 
 echo test10_ll
 ../../../test/dis64 test10_ll.o 2>&1 | grep "END - FINISHED PROCESSING"
+echo test11_ll
+../../../test/dis64 test11_ll.o 2>&1 | grep "END - FINISHED PROCESSING"

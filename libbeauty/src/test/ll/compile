@@ -1,1 +1,2 @@
 clang -c -g -O0 -o test10_ll.o test10_ll.ll
+clang -c -g -O0 -o test11_ll.o test11_ll.ll
