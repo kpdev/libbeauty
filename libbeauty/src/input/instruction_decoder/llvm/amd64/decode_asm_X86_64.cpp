@@ -37,12 +37,14 @@ int DecodeAsmOpInfoCallback(void *DisInfo, uint64_t PC,
 //	llvm::outs() << "DisInfo = " << DisInfo << "\n";
 	int num_operands = Inst->getNumOperands();
 	if (num_operands >= 16) {
-		llvm::outs() << "num_operands >= 16\n";
+//		llvm::outs() << "num_operands >= 16\n";
+		debug_print(DEBUG_INPUT_DIS, 1, "NumOperands >= 16\n");
 		exit(1);
 	}
 	dis_info->offset[num_operands] = Offset;
 	dis_info->size[num_operands] = Size;
 //	llvm::outs() << format("NumOperands = 0x%x, ", num_operands) << format("Offset = 0x%x, ", Offset) << format("Size = 0x%x", Size) << "\n";
+	debug_print(DEBUG_INPUT_DIS, 1, "NumOperands = 0x%x, Offset = 0x%x, Size = 0x%x\n", num_operands, Offset, Size);
 	return 0;
 }
 
@@ -124,7 +126,7 @@ int DecodeAsmX86_64::setup() {
 
 	std::unique_ptr<MCSymbolizer> Symbolizer(TheTarget->createMCSymbolizer(
 		TripleName, GetOpInfo, SymbolLookUp, DisInfo, Ctx, RelInfo.release()));
-	//DisAsm->setSymbolizer(std::move(Symbolizer));
+	DisAsm->setSymbolizer(std::move(Symbolizer));
 	//DisAsm->setupForSymbolicDisassembly(GetOpInfo, SymbolLookUp, DisInfo, Ctx, RelInfo);
 
 	// Set up the instruction printer.
