@@ -2988,6 +2988,7 @@ int change_add_to_gep1(struct self_s *self, struct external_entry_point_s *exter
 	struct memory_s *memory;
 	int value_id1;
 	int value_id2;
+	int value_id3;
 
 	int inst;
 	struct label_s label;
@@ -3002,17 +3003,24 @@ int change_add_to_gep1(struct self_s *self, struct external_entry_point_s *exter
 			debug_print(DEBUG_MAIN, 1, "change_add_to_gep1() node 0x%x, inst 0x%x\n", node, inst);
 			value_id1 = label_redirect[inst_log1->value1.value_id].redirect;
 			value_id2 = label_redirect[inst_log1->value2.value_id].redirect;
+			value_id3 = label_redirect[inst_log1->value3.value_id].redirect;
 			if ((labels[value_id1].lab_pointer > 0) ||
-				(labels[value_id2].lab_pointer > 0)) {
+				(labels[value_id2].lab_pointer > 0) ||
+				(labels[value_id3].lab_pointer > 0)) {
 				instruction->opcode = GEP1;
+				debug_print(DEBUG_MAIN, 1, "change_add_to_gep1() node 0x%x, inst 0x%x opcode = 0x%x\n",
+					node, inst, inst_log_entry[inst].instruction.opcode);
 			}
 			break;
 		case SUB:
 			debug_print(DEBUG_MAIN, 1, "change_sub_to_gep1() node 0x%x, inst 0x%x\n", node, inst);
 			value_id1 = label_redirect[inst_log1->value1.value_id].redirect;
 			value_id2 = label_redirect[inst_log1->value2.value_id].redirect;
-			if ((labels[value_id1].lab_pointer > 0) &&
-				(labels[value_id2].lab_pointer == 0)) {
+			value_id3 = label_redirect[inst_log1->value3.value_id].redirect;
+			/* FIXME: P1 - P2 = I, not P3. */
+			if ((labels[value_id1].lab_pointer > 0) ||
+				(labels[value_id2].lab_pointer > 0) ||
+				(labels[value_id3].lab_pointer > 0)) {
 				instruction->opcode = GEP1;
 				labels[value_id2].value = -labels[value_id2].value;
 				instruction->srcB.index = -instruction->srcB.index;
