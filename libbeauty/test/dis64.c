@@ -2471,7 +2471,8 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 	return 0;
 }
 
-int tip_add(struct self_s *self, int entry_point, int node, int inst, int phi, int operand, int label_index, int pointer, int integer, int bit_size)
+int tip_add(struct self_s *self, int entry_point, int node, int inst, int phi, int operand,
+	int label_index, int pointer, int pointer_size, int integer, int bit_size)
 {
 	struct external_entry_point_s *external_entry_point = &(self->external_entry_points[entry_point]);
 	struct control_flow_node_s *nodes = external_entry_point->nodes;
@@ -2499,9 +2500,10 @@ int tip_add(struct self_s *self, int entry_point, int node, int inst, int phi, i
 		label->tip[index].phi_number = phi;
 		label->tip[index].operand = operand;
 		label->tip[index].lab_pointer_first = pointer;
+		label->tip[index].lab_pointed_to_size = pointer_size;
 		label->tip[index].lab_integer_first = integer;
 		label->tip[index].lab_size_first = bit_size;
-		printf("tip_add:0x%x:0x%lx node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
+		printf("tip_add:0x%x:0x%lx node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, pointer_first = 0x%x, pointed_to_size = 0x%x, integer_first = 0x%x, size_first = 0x%x\n",
 			label_index,
 			label_redirect[label_index].redirect,
 			label->tip[index].node,
@@ -2509,6 +2511,7 @@ int tip_add(struct self_s *self, int entry_point, int node, int inst, int phi, i
 			label->tip[index].phi_number,
 			label->tip[index].operand,
 			label->tip[index].lab_pointer_first,
+			label->tip[index].lab_pointed_to_size,
 			label->tip[index].lab_integer_first,
 			label->tip[index].lab_size_first);
 		if (label_index == 0) {
@@ -2573,10 +2576,10 @@ int build_tip_table(struct self_s *self, int entry_point, int node)
 			is_pointer2 = is_pointer_reg(&(instruction->dstA));
 			is_pointer = is_pointer1 | is_pointer2;
 			if (value_id == 3) is_pointer = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, instruction->srcA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, 0, instruction->srcA.value_size);
 			value_id = inst_log1->value3.value_id;
 			if (value_id == 3) is_pointer = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer, 0, instruction->dstA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer, 0, 0, instruction->dstA.value_size);
 			ret = 0;
 			break;
 
@@ -2585,14 +2588,12 @@ int build_tip_table(struct self_s *self, int entry_point, int node)
 			is_pointer1 = is_pointer3 = is_pointer_reg(&(instruction->dstA));
 			is_pointer2 = 0;
 			value_id = inst_log1->value1.value_id;
-			if (value_id == 3) is_pointer1 = 1;
-			//tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, instruction->srcA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, 1, instruction->srcA.value_size, 0, instruction->srcA.indirect_size);
 			value_id = inst_log1->value2.value_id;
-			if (value_id == 3) is_pointer2 = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, 1, 0, instruction->srcB.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, 1, 0, 0, instruction->srcB.value_size);
 			value_id = inst_log1->value3.value_id;
 			if (value_id == 3) is_pointer3 = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer, 0, instruction->dstA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer3, 0, 0, instruction->dstA.value_size);
 			ret = 0;
 			break;
 
@@ -2601,12 +2602,11 @@ int build_tip_table(struct self_s *self, int entry_point, int node)
 			is_pointer1 = is_pointer3 = is_pointer_reg(&(instruction->srcA));
 			value_id = inst_log1->value1.value_id;
 			if (value_id == 3) is_pointer1= 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer1, 0, instruction->srcA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer1, 0, 0, instruction->srcA.value_size);
 			value_id = inst_log1->value2.value_id;
-			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, 1, 0, instruction->srcB.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, 1, 0, 0, instruction->srcB.value_size);
 			value_id = inst_log1->value3.value_id;
-			if (value_id == 3) is_pointer3 = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer3, 0, instruction->dstA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, 1, instruction->dstA.value_size, 0, instruction->dstA.indirect_size);
 			ret = 0;
 			break;
 
@@ -2630,23 +2630,23 @@ int build_tip_table(struct self_s *self, int entry_point, int node)
 			value_id = inst_log1->value1.value_id;
 			is_pointer = is_pointer_reg(&(instruction->srcA));
 			if (value_id == 3) is_pointer = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, instruction->srcA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, is_pointer, 0, 0, instruction->srcA.value_size);
 			value_id = inst_log1->value2.value_id;
 			is_pointer = is_pointer_reg(&(instruction->srcB));
 			if (value_id == 3) is_pointer = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, is_pointer, 0, instruction->srcB.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 2, value_id, is_pointer, 0, 0, instruction->srcB.value_size);
 			value_id = inst_log1->value3.value_id;
 			is_pointer = is_pointer_reg(&(instruction->dstA));
 			if (value_id == 3) is_pointer = 1;
-			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer, 0, instruction->dstA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, is_pointer, 0, 0, instruction->dstA.value_size);
 			ret = 0;
 			break;
 
 		case RET:
 			value_id = inst_log1->value1.value_id;
-			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, 0, 0, instruction->srcA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, 0, 0, 0, instruction->srcA.value_size);
 			//value_id = inst_log1->value3.value_id;
-			//tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, 0, 0, instruction->dstA.value_size);
+			//tmp = tip_add(self, entry_point, node, inst, 0, 3, value_id, 0, 0, 0, instruction->dstA.value_size);
 			ret = 0;
 			break;
 
@@ -2659,7 +2659,7 @@ int build_tip_table(struct self_s *self, int entry_point, int node)
 
 		case BC:
 			value_id = inst_log1->value1.value_id;
-			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, 0, 1, instruction->srcA.value_size);
+			tmp = tip_add(self, entry_point, node, inst, 0, 1, value_id, 0, 0, 1, instruction->srcA.value_size);
 			ret = 0;
 			break;
 
@@ -2863,9 +2863,9 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 				   new inst, the REG_TMP3 and its label.
 				*/
 				tmp = tip_add(self, entry_point, node, inst_new, 0, 1, variable_id_add_tip,
-					label->tip[n].lab_pointer_first, 0, label->tip[n].lab_size_first);
+					label->tip[n].lab_pointer_first, 0, 0, label->tip[n].lab_size_first);
 				tmp = tip_add(self, entry_point, node, inst_modified, 0, 1, variable_id_add_tip,
-					label->tip[n].lab_pointer_first, 0, label->tip[n].lab_size_first);
+					label->tip[n].lab_pointer_first, 0, 0, label->tip[n].lab_size_first);
 				label->tip[n].inst_number = inst_new;
 				label->tip[n].operand = 1;
 				label->tip[n].lab_size_first = size;
@@ -2894,13 +2894,14 @@ int tip_print_label(struct self_s *self, int entry_point, int label_index)
 	if ((label->scope != 0) && (label->tip_size > 0) &&
 		(label_redirect[label_index].redirect == label_index)) {
 		for (n = 0; n < label->tip_size; n++) {
-			printf("label tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
+			printf("label tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, pointer_first = 0x%x, pointed_to_size = 0x%x, integer_first = 0x%x, size_first = 0x%x\n",
 			label_index,
 			label->tip[n].node,
 			label->tip[n].inst_number,
 			label->tip[n].phi_number,
 			label->tip[n].operand,
 			label->tip[n].lab_pointer_first,
+			label->tip[n].lab_pointed_to_size,
 			label->tip[n].lab_integer_first,
 			label->tip[n].lab_size_first);
 		}
@@ -2991,7 +2992,6 @@ int change_add_to_gep1(struct self_s *self, struct external_entry_point_s *exter
 	int inst;
 	struct label_s label;
 	int found = 0;
-	debug_print(DEBUG_MAIN, 1, "change_add_to_gep1() node 0x%x\n", node);
 
 	inst = nodes[node].inst_start;
 	do {
@@ -2999,6 +2999,7 @@ int change_add_to_gep1(struct self_s *self, struct external_entry_point_s *exter
 		instruction =  &inst_log1->instruction;
 		switch (instruction->opcode) {
 		case ADD:
+			debug_print(DEBUG_MAIN, 1, "change_add_to_gep1() node 0x%x, inst 0x%x\n", node, inst);
 			value_id1 = label_redirect[inst_log1->value1.value_id].redirect;
 			value_id2 = label_redirect[inst_log1->value2.value_id].redirect;
 			if ((labels[value_id1].lab_pointer > 0) ||
@@ -3007,6 +3008,7 @@ int change_add_to_gep1(struct self_s *self, struct external_entry_point_s *exter
 			}
 			break;
 		case SUB:
+			debug_print(DEBUG_MAIN, 1, "change_sub_to_gep1() node 0x%x, inst 0x%x\n", node, inst);
 			value_id1 = label_redirect[inst_log1->value1.value_id].redirect;
 			value_id2 = label_redirect[inst_log1->value2.value_id].redirect;
 			if ((labels[value_id1].lab_pointer > 0) &&
