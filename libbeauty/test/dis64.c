@@ -2119,7 +2119,7 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				} else if (instruction->srcA.relocated) {
 					label.scope = 3;
 					label.type = 2;
-					label.lab_pointer = 0;
+					label.lab_pointer = 1;
 					label.value = instruction->srcA.index;
 					label.size_bits = instruction->srcA.value_size;
 				} else {
@@ -2183,7 +2183,7 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 				} else if (instruction->srcB.relocated) {
 					label.scope = 3;
 					label.type = 2;
-					label.lab_pointer = 0;
+					label.lab_pointer = 1;
 					label.value = instruction->srcB.index;
 					label.size_bits = instruction->srcB.value_size;
 				} else {

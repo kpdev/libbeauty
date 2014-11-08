@@ -610,6 +610,14 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
+		label = &external_entry_point->labels[value_id];
+		if (label->lab_pointer) {
+			/* Swap srcA and srcB */
+			printf("GEP swap srcA and srcB\n");
+			value_tmp = srcA;
+			srcA = srcB;
+			srcB = value_tmp;
+		}
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
 		srcA->dump();
 		srcB->dump();
