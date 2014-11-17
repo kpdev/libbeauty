@@ -2700,7 +2700,10 @@ int tip_process_label(struct self_s *self, int entry_point, int label_index)
 		for (n = 0; n < label->tip_size; n++) {
 			if (label->tip[n].lab_pointer_first) {
 				label->size_bits = label->tip[n].lab_size_first;
-				label->pointer_type_size_bits = 64;
+				label->pointer_type_size_bits = label->tip[n].lab_pointed_to_size;
+				if (label->tip[n].lab_pointed_to_size != 64) {
+					label->pointer_type = 2; /* INT */
+				}
 				label->lab_pointer += label->tip[n].lab_pointer_first;
 			}
 		}
