@@ -198,6 +198,8 @@ struct label_s {
 	uint64_t value;
 	/* size in bits */
 	uint64_t size_bits;
+	/* pointer type: Unknown = 0, Pointer-to-Pointer = 1, Pointer-to-int = 2 */
+	uint64_t pointer_type;
 	/* pointer type size in bits */
 	uint64_t pointer_type_size_bits;
 	/* is it a pointer */
