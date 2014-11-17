@@ -79,6 +79,29 @@ int LLVM_ir_export::find_function_member_node(struct self_s *self, struct extern
 	return found;
 }
 
+int sprint_value(raw_string_ostream &OS1, Value *valueA)
+{
+	valueA->print(OS1);
+	OS1 << "\n";
+	OS1.flush();
+	return 0;
+}
+
+int sprint_srcA_srcB(raw_string_ostream &OS1, Value *srcA, Value *srcB)
+{
+	srcA->print(OS1);
+	OS1 << "\n";
+	srcB->print(OS1);
+	OS1 << "\n";
+	OS1 << "srcA_type = ";
+	srcA->getType()->print(OS1);
+	OS1 << ", srcB_type = ";
+	srcB->getType()->print(OS1);
+	OS1.flush();
+	return 0;
+}
+
+
 int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct declaration_s *declaration, Value **value, BasicBlock **bb, int node, int external_entry, int inst)
 {
 	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
@@ -100,6 +123,8 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 	int node_false;
 	int result = 0;
 	int n;
+	std::string Buf1;
+	raw_string_ostream OS1(Buf1);
 
 	switch (inst_log1->instruction.opcode) {
 	case 1:  // MOV
@@ -147,7 +172,6 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
-		srcA->dump();
 		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
@@ -157,12 +181,18 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
-		srcB->dump();
+
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
-		printf("srcA = %x, srcB = %x\n", srcA->getType(), srcB->getType());
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = BinaryOperator::CreateAdd(srcA, srcB, buffer, bb[node]);
 		value[inst_log1->value3.value_id] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 4:  // SUB
 		printf("LLVM 0x%x: OPCODE = 0x%x:SUB\n", inst, inst_log1->instruction.opcode);
@@ -184,7 +214,6 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
-		srcA->dump();
 		srcA_size = external_entry_point->labels[value_id].size_bits;
 		printf("srcA: scope=0x%lx, type=0x%lx value=0x%lx size_bits=0x%lx pointer_type_size_bits=0x%lx lab_pointer=0x%lx lab_signed=0x%lx lab_unsigned=0x%lx name=%s\n",
 			external_entry_point->labels[value_id].scope,
@@ -206,7 +235,6 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
-		srcB->dump();
 		srcB_size = external_entry_point->labels[value_id].size_bits;
 		printf("srcB: scope=0x%lx, type=0x%lx value=0x%lx size_bits=0x%lx pointer_type_size_bits=0x%lx lab_pointer=0x%lx lab_signed=0x%lx lab_unsigned=0x%lx name=%s\n",
 			external_entry_point->labels[value_id].scope,
@@ -220,10 +248,18 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			external_entry_point->labels[value_id].name);
 
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
+
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
 		printf("srcA_size = 0x%lx, srcB_size = 0x%lx\n", srcA_size, srcB_size);
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = BinaryOperator::CreateSub(srcA, srcB, buffer, bb[node]);
 		value[inst_log1->value3.value_id] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 0xd:  // MUL
 		printf("LLVM 0x%x: OPCODE = 0x%x:MUL\n", inst, inst_log1->instruction.opcode);
@@ -245,7 +281,6 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
-		srcA->dump();
 		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
@@ -255,11 +290,18 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
-		srcB->dump();
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
+
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = BinaryOperator::Create(Instruction::Mul, srcA, srcB, buffer, bb[node]);
 		value[inst_log1->value3.value_id] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 0xe:  // IMUL
 		printf("LLVM 0x%x: OPCODE = 0x%x:IMUL\n", inst, inst_log1->instruction.opcode);
@@ -281,7 +323,6 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
-		srcA->dump();
 		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
@@ -291,17 +332,27 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
-		srcB->dump();
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
+
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = BinaryOperator::Create(Instruction::Mul, srcA, srcB, buffer, bb[node]);
 		value[inst_log1->value3.value_id] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 0x11:  // JMP
 		printf("LLVM 0x%x: OPCODE = 0x%x:JMP node_end = 0x%x\n", inst, inst_log1->instruction.opcode, inst_log1->node_end);
 		if (inst_log1->node_end) {
 			node_true = nodes[node].link_next[0].node;
-			BranchInst::Create(bb[node_true], bb[node]);
+			dstA = BranchInst::Create(bb[node_true], bb[node]);
+			sprint_value(OS1, dstA);
+			printf("%s\n", Buf1.c_str());
+			Buf1.clear();
 			result = 1;
 		}
 		break;
@@ -325,7 +376,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			PointerType* PointerTy_1 = PointerType::get(IntegerType::get(mod->getContext(), 64), 0);
 			ConstantPointerNull* const_ptr_5 = ConstantPointerNull::get(PointerTy_1);
 			vector_params.push_back(const_ptr_5); /* EIP */
-			printf("LLVM 0x%x: args_size = 0x%x\n", inst, vector_params.size());
+			printf("LLVM 0x%x: args_size = 0x%lx\n", inst, vector_params.size());
 			tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 			declaration[0].F->dump();
 			printf("LLVM 0x%x: declaration dump done.\n", inst);
@@ -348,7 +399,9 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			dstA = call_inst;
 			value[inst_log1->value3.value_id] = dstA;
 			printf("LLVM 0x%x: dstA %p\n", inst, dstA);
-			dstA->dump();
+			sprint_value(OS1, dstA);
+			printf("%s\n", Buf1.c_str());
+			Buf1.clear();
 		}
 		break;
 	case 0x1e:  // RET
@@ -364,7 +417,13 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
-		ReturnInst::Create(Context, srcA, bb[node]);
+		sprint_value(OS1, srcA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+		dstA = ReturnInst::Create(Context, srcA, bb[node]);
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		result = 1;
 		break;
 	case 0x1f:  // SEX
@@ -383,12 +442,18 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
+		sprint_value(OS1, srcA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
 		label = &external_entry_point->labels[value_id_dst];
 		tmp = label_to_string(label, buffer, 1023);
 		printf("label->size_bits = 0x%lx\n", label->size_bits);
 		dstA = new SExtInst(srcA, IntegerType::get(mod->getContext(), label->size_bits), buffer, bb[node]);
 		value[value_id_dst] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 0x23:  // ICMP
 		printf("LLVM 0x%x: OPCODE = 0x%x:ICMP\n", inst, inst_log1->instruction.opcode);
@@ -422,11 +487,19 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcB = value[value_id];
+
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		//dstA = new ICmpInst(*bb, ICmpInst::ICMP_EQ, srcA, srcB, buffer);
 		dstA = new ICmpInst(*bb[node], predicate_to_llvm_table[inst_log1->instruction.predicate], srcA, srcB, buffer);
 		value[inst_log1->value3.value_id] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 0x24:  // BC
 		printf("LLVM 0x%x: OPCODE = 0x%x:BC\n", inst, inst_log1->instruction.opcode);
@@ -443,10 +516,16 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 		}
 		srcA = value[value_id];
+		sprint_value(OS1, srcA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		//BranchInst::Create(label_7, label_9, int1_11, label_6);
 		node_true = nodes[node].link_next[0].node;
 		node_false = nodes[node].link_next[1].node;
-		BranchInst::Create(bb[node_true], bb[node_false], srcA, bb[node]);
+		dstA = BranchInst::Create(bb[node_true], bb[node_false], srcA, bb[node]);
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		result = 1;
 		break;
 	case 0x25:  // LOAD
@@ -483,15 +562,24 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 				}
 			}
 			srcB = value[value_id];
+
 			printf("srcA = %p, srcB = %p\n", srcA, srcB);
-			srcA->dump();
-			srcB->dump();
+			sprint_srcA_srcB(OS1, srcA, srcB);
+			printf("%s\n", Buf1.c_str());
+			Buf1.clear();
+
 			value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
 			label = &external_entry_point->labels[value_id_dst];
 			tmp = label_to_string(label, buffer, 1023);
 			dstA_load = new LoadInst(srcA, buffer, false, bb[node]);
 			dstA_load->setAlignment(label->size_bits >> 3);
 			dstA = dstA_load;
+
+			dstA->print(OS1);
+			OS1.flush();
+			printf("%s\n", Buf1.c_str());
+			Buf1.clear();
+
 			if (value_id_dst) {
 				value[value_id_dst] = dstA;
 			} else {
@@ -525,14 +613,22 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			}
 			srcB = value[value_id];
 			printf("srcA = %p, srcB = %p\n", srcA, srcB);
-			srcA->dump();
-			srcB->dump();
+			sprint_srcA_srcB(OS1, srcA, srcB);
+			printf("%s\n", Buf1.c_str());
+			Buf1.clear();
+
 			value_id_dst = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
 			label = &external_entry_point->labels[value_id_dst];
 			tmp = label_to_string(label, buffer, 1023);
 			dstA_load = new LoadInst(srcA, buffer, false, bb[node]);
 			dstA_load->setAlignment(label->size_bits >> 3);
 			dstA = dstA_load;
+
+			dstA->print(OS1);
+			OS1.flush();
+			printf("%s\n", Buf1.c_str());
+			Buf1.clear();
+
 			if (value_id_dst) {
 				value[value_id_dst] = dstA;
 			} else {
@@ -574,10 +670,15 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			break;
 		}
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
-		// FIXME: temporary comment out.
-		srcA->dump();
-		srcB->dump();
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		dstA = new StoreInst(srcA, srcB, false, bb[node]);
+		dstA->print(OS1);
+		OS1 << "\n";
+		OS1.flush();
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 	case 0x2F:  // GEP1
 		printf("LLVM 0x%x: OPCODE = 0x%x:GEP1\n", inst, inst_log1->instruction.opcode);
@@ -618,14 +719,21 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			srcA = srcB;
 			srcB = value_tmp;
 		}
+
 		printf("srcA = %p, srcB = %p\n", srcA, srcB);
-		srcA->dump();
-		srcB->dump();
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
 		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
 		dstA = GetElementPtrInst::Create(srcA, srcB, buffer, bb[node]);
-		printf("dstA = %p\n", dstA);
-		dstA->dump();
 		value[inst_log1->value3.value_id] = dstA;
+
+		dstA->print(OS1);
+		OS1 << "\n";
+		OS1.flush();
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
 		break;
 
 	case 0x37:  // ZEXT
