@@ -2791,6 +2791,24 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 					return 0;
 				}
 				tmp = insert_nop_before(self, inst_modified, &inst_new);
+				/* FIXME: Not support LOAD, STORE or MOV inst yet. */
+				if (inst_log_entry[inst_modified].instruction.opcode == LOAD) {
+					debug_print(DEBUG_MAIN, 1, "ZEXT/TRUNC before unhandled LOAD instruction\n");
+					exit(1);
+				}
+				if (inst_log_entry[inst_modified].instruction.opcode == STORE) {
+					debug_print(DEBUG_MAIN, 1, "ZEXT/TRUNC before unhandled STORE instruction\n");
+					exit(1);
+				}
+				if (inst_log_entry[inst_modified].instruction.opcode == MOV) {
+					debug_print(DEBUG_MAIN, 1, "ZEXT/TRUNC before unhandled MOV instruction\n");
+					/* Need to first separate the label merge that the MOV instruction did,
+					   Add the ZEXT/TRUNC.
+					   Re-implement the new label merge that rhe MOV instruction should do.
+					   NOTE: Maybe move the label merge to later?
+					 */
+					//exit(1);
+				}
 				if (label->tip[n].lab_size_first > size) {
 					inst_log_entry[inst_new].instruction.opcode = ZEXT;
 				} else {
@@ -2798,7 +2816,7 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 				}
 				inst_log_entry[inst_new].instruction.flags = 0;
 
-				printf("label needed zext: size=0x%x, inst_new=0x%x. tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
+				printf("label needed zext/trunc: size=0x%x, inst_new=0x%x. tip:0x%x node = 0x%x, inst = 0x%x, phi = 0x%x, operand = 0x%x, lap_pointer_first = 0x%x, lab_integer_first = 0x%x, lab_size_first = 0x%x\n",
 				size,
 				inst_new,
 				label_index,
@@ -2811,7 +2829,6 @@ int tip_add_zext(struct self_s *self, int entry_point, int label_index)
 				label->tip[n].lab_size_first);
 				tmp = dis64_copy_operand(self, inst_modified, operand_modified, inst_new, 1, size);
 				tmp = dis64_copy_operand(self, inst_modified, operand_modified, inst_new, 3, size);
-				/* FIXME: Not support LOAD or STORE inst yet. */
 				inst_log_entry[inst_new].instruction.srcA.value_size = size;
 				inst_log_entry[inst_new].instruction.dstA.index = REG_TMP3;
 				inst_log_entry[inst_new].value3.value_id =
@@ -4038,6 +4055,7 @@ int assign_id_label_dst(struct self_s *self, int function, int inst, struct inst
 	case SAR:
 	case SEX:
 	case ZEXT:
+	case TRUNC:
 	case ICMP:
 	case LOAD:
 		switch (instruction->dstA.indirect) {
@@ -5397,6 +5415,8 @@ int main(int argc, char *argv[])
 		}
 	}
 	/* turn "MOV reg, reg" into a NOP from the SSA perspective. Make the dst = src label */
+	/* FIXME: Comment out mov label merge, due to zext/trunc code */
+#if 0
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
 			for(n = 1; n < external_entry_points[l].nodes_size; n++) {
@@ -5412,6 +5432,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+#endif
 	/* Build TIP table */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
