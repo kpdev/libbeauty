@@ -5414,25 +5414,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	/* turn "MOV reg, reg" into a NOP from the SSA perspective. Make the dst = src label */
-	/* FIXME: Comment out mov label merge, due to zext/trunc code */
-#if 0
-	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
-		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
-			for(n = 1; n < external_entry_points[l].nodes_size; n++) {
-				if (!external_entry_points[l].nodes[n].valid) {
-					/* Only output nodes that are valid */
-					continue;
-				}
-				tmp = redirect_mov_reg_reg_labels(self, &external_entry_points[l], n);
-				if (tmp) {
-					printf("redirect_mov_reg_reg() failed\n");
-					exit(1);
-				}
-			}
-		}
-	}
-#endif
+
 	/* Build TIP table */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
@@ -5487,6 +5469,28 @@ int main(int argc, char *argv[])
 				tmp = change_add_to_gep1(self, &external_entry_points[l], n);
 				if (tmp) {
 					printf("change_add_to_gep1() failed\n");
+					exit(1);
+				}
+			}
+		}
+	}
+#endif
+
+	/* turn "MOV reg, reg" into a NOP from the SSA perspective. Make the dst = src label */
+	/* FIXME: Comment out mov label merge, due to zext/trunc code */
+	/* FIXME: TODO: This needs to be more careful about the merge. */
+	/*        It should check that both types are the same before merging */
+#if 1
+	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
+		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
+			for(n = 1; n < external_entry_points[l].nodes_size; n++) {
+				if (!external_entry_points[l].nodes[n].valid) {
+					/* Only output nodes that are valid */
+					continue;
+				}
+				tmp = redirect_mov_reg_reg_labels(self, &external_entry_points[l], n);
+				if (tmp) {
+					printf("redirect_mov_reg_reg() failed\n");
 					exit(1);
 				}
 			}
