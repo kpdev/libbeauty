@@ -121,9 +121,13 @@ enum {
 extern const char * opcode_table[];
 /* FIXME: The values are currently set to 64bit, so can handle 64bit and 32bit, but not 128bit regs. */
 #define REG_AX 0x08
+#define REG_AH 0x09
 #define REG_CX 0x10
+#define REG_CH 0x11
 #define REG_DX 0x18
+#define REG_DH 0x19
 #define REG_BX 0x20
+#define REG_BH 0x21
 #define REG_SP 0x28
 #define REG_BP 0x30
 #define REG_SI 0x38
