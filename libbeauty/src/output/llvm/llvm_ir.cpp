@@ -261,6 +261,48 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		printf("%s\n", Buf1.c_str());
 		Buf1.clear();
 		break;
+	case 7:  // XOR
+		printf("LLVM 0x%x: OPCODE = 0x%x:XOR\n", inst, inst_log1->instruction.opcode);
+//		if (inst_log1->instruction.dstA.index == 0x28) {
+//			/* Skip the 0x28 reg as it is the SP reg */
+//			break;
+//		}
+		printf("value_id1 = 0x%lx->0x%lx, value_id2 = 0x%lx->0x%lx\n",
+			inst_log1->value1.value_id,
+			external_entry_point->label_redirect[inst_log1->value1.value_id].redirect,
+			inst_log1->value2.value_id,
+			external_entry_point->label_redirect[inst_log1->value2.value_id].redirect);
+		value_id = external_entry_point->label_redirect[inst_log1->value1.value_id].redirect;
+		if (!value[value_id]) {
+			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+			if (tmp) {
+				printf("failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				exit(1);
+			}
+		}
+		srcA = value[value_id];
+		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
+		if (!value[value_id]) {
+			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+			if (tmp) {
+				printf("failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				exit(1);
+			}
+		}
+		srcB = value[value_id];
+
+		printf("srcA = %p, srcB = %p\n", srcA, srcB);
+		sprint_srcA_srcB(OS1, srcA, srcB);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+
+		tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
+		dstA = BinaryOperator::CreateXor(srcA, srcB, buffer, bb[node]);
+		value[inst_log1->value3.value_id] = dstA;
+		sprint_value(OS1, dstA);
+		printf("%s\n", Buf1.c_str());
+		Buf1.clear();
+		break;
 	case 0xd:  // MUL
 		printf("LLVM 0x%x: OPCODE = 0x%x:MUL\n", inst, inst_log1->instruction.opcode);
 //		if (inst_log1->instruction.dstA.index == 0x28) {
