@@ -661,7 +661,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			printf("LLVM 0x%x: FIXME: Invalid srcA value_id\n", inst);
 			break;
 		}
-		value_id = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
+		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (value_id) {
 			printf("LLVM 0x%x: srcB value_id 0x%x\n", inst, value_id);
 			srcB = value[value_id];
