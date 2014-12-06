@@ -733,6 +733,7 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 				break;
 			/* DSTA, SRCA, SRCB == nothing */
 			case MOV:
+			case TRUNC:
 				/* If SRC and DST in same instruction, let SRC dominate. */
 				if ((instruction->srcA.store == STORE_REG) &&
 					(instruction->srcA.indirect == IND_DIRECT)) {
@@ -747,7 +748,7 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 				}
 				if ((instruction->dstA.store == STORE_REG) &&
 					(instruction->dstA.indirect != IND_DIRECT)) {
-					debug_print(DEBUG_MAIN, 1, "ERROR: MOV dstA.indirect\n");
+					debug_print(DEBUG_MAIN, 1, "ERROR: MOV,TRUNC dstA.indirect\n");
 					exit(1);
 				}
 
