@@ -670,8 +670,12 @@ int convert_ll_inst_to_rtl(struct self_s *self, struct instruction_low_level_s *
 		copy_operand(&ll_inst->dstA, &ll_inst->srcA);
 		ll_inst->srcB.kind = KIND_IMM;
 		ll_inst->srcB.size = ll_inst->dstA.size;
+		if (ll_inst->dstA.size == 0) {
+			debug_print(DEBUG_INPUT_DIS, 1, "ERROR DEC value size == 0\n");
+			exit(1);
+		}
 		ll_inst->srcB.operand[0].value = 1;
-		ll_inst->srcB.operand[0].size = 0;
+		ll_inst->srcB.operand[0].size = ll_inst->dstA.size;
 		ll_inst->srcB.operand[0].offset = 0;
 		ll_inst->opcode = SUB;
 		tmp  = convert_base(self, ll_inst, 1, dis_instructions);
@@ -681,8 +685,12 @@ int convert_ll_inst_to_rtl(struct self_s *self, struct instruction_low_level_s *
 		copy_operand(&ll_inst->dstA, &ll_inst->srcA);
 		ll_inst->srcB.kind = KIND_IMM;
 		ll_inst->srcB.size = ll_inst->dstA.size;
+		if (ll_inst->dstA.size == 0) {
+			debug_print(DEBUG_INPUT_DIS, 1, "ERROR INC value size == 0\n");
+			exit(1);
+		}
 		ll_inst->srcB.operand[0].value = 1;
-		ll_inst->srcB.operand[0].size = 0;
+		ll_inst->srcB.operand[0].size = ll_inst->dstA.size;
 		ll_inst->srcB.operand[0].offset = 0;
 		ll_inst->opcode = ADD;
 		tmp  = convert_base(self, ll_inst, 1, dis_instructions);
