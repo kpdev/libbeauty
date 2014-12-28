@@ -1316,7 +1316,9 @@ int fill_phi_node_list(struct self_s *self, struct control_flow_node_s *nodes, i
 		}
 		printf("node = 0x%x\n", node);
 		if (nodes[node].phi_size > 0) {
-			debug_print(DEBUG_ANALYSE_PHI, 1, "phi_size = 0x%x, prev_size = 0x%x\n", nodes[node].phi_size, nodes[node].prev_size);
+			debug_print(DEBUG_ANALYSE_PHI, 1, "nodes[node].phi_size = 0x%x, nodes[node].prev_size = 0x%x\n",
+				nodes[node].phi_size,
+				nodes[node].prev_size);
 			for (n = 0; n < nodes[node].phi_size; n++) {
 				nodes[node].phi[n].phi_node = calloc(nodes[node].prev_size, sizeof(struct phi_node_s));
 				nodes[node].phi[n].phi_node_size = nodes[node].prev_size;
@@ -1359,8 +1361,11 @@ int fill_phi_node_list(struct self_s *self, struct control_flow_node_s *nodes, i
 	return 0;
 }
 
-int fill_phi_src_value_id(struct self_s *self, struct control_flow_node_s *nodes, int nodes_size)
+int fill_phi_src_value_id(struct self_s *self, int entry_point)
 {
+	struct control_flow_node_s *nodes = self->external_entry_points[entry_point].nodes;
+	int nodes_size = self->external_entry_points[entry_point].nodes_size;
+	struct label_s *labels = self->external_entry_points[entry_point].labels;
 	struct inst_log_entry_s *inst_log_entry = self->inst_log_entry;
 	struct inst_log_entry_s *inst_log1;
 	struct instruction_s *instruction;
@@ -1382,7 +1387,7 @@ int fill_phi_src_value_id(struct self_s *self, struct control_flow_node_s *nodes
 		}
 		printf("node = 0x%x\n", node);
 		if (nodes[node].phi_size > 0) {
-			printf("phi_size = 0x%x, prev_size = 0x%x\n", nodes[node].phi_size, nodes[node].prev_size);
+			printf("nodes[node].phi_size = 0x%x, nodes[node].prev_size = 0x%x\n", nodes[node].phi_size, nodes[node].prev_size);
 			for (n = 0; n < nodes[node].phi_size; n++) {
 				for (m = 0; m < nodes[node].phi[n].phi_node_size; m++) {
 					node_source = nodes[node].phi[n].phi_node[m].node;
@@ -1401,9 +1406,12 @@ int fill_phi_src_value_id(struct self_s *self, struct control_flow_node_s *nodes
 							}
 							printf("fill_phi_src_value_id inst = 0x%x, value_id = 0x%x\n", inst, value_id);
 						} else {
+							/* FIXME: Check that value3 is the same reg */
 							inst_log1 =  &inst_log_entry[inst];
+							instruction =  &inst_log1->instruction;
 							value_id = inst_log1->value3.value_id;
-							printf("fill_phi_src_value_id inst = 0x%x, value_id = 0x%x\n", inst, value_id);
+							printf("JCD:VALUE3:fill_phi_src_value_id inst = 0x%x, value_id = 0x%x, reg = 0x0%x\n", inst, value_id, reg);
+							print_inst(self, instruction, inst, labels);
 						}
 						if (value_id == 0) {
 							printf("FAILED: fill_phi_src_value_id value_id should not be 0\n");
@@ -1422,6 +1430,7 @@ int fill_phi_src_value_id(struct self_s *self, struct control_flow_node_s *nodes
 int fill_phi_dst_size_from_src_size(struct self_s *self, int entry_point)
 {
 	struct label_s *labels = self->external_entry_points[entry_point].labels;
+	struct label_redirect_s *label_redirect = self->external_entry_points[entry_point].label_redirect;
 	struct control_flow_node_s *nodes = self->external_entry_points[entry_point].nodes;
 	int nodes_size = self->external_entry_points[entry_point].nodes_size;
 	int node;
@@ -1446,7 +1455,7 @@ int fill_phi_dst_size_from_src_size(struct self_s *self, int entry_point)
 				first_size = 0;
 				for (m = 0; m < nodes[node].phi[n].phi_node_size; m++) {
 					value_id = nodes[node].phi[n].phi_node[m].value_id;
-					printf("fill_phi_dst_size node = 0x%x, phi_reg = 0x%x, value_id = 0x%x, size = 0x%lx\n", node, nodes[node].phi[n].reg, value_id, labels[value_id].size_bits);
+					printf("fill_phi_dst_size node = 0x%x, phi_reg = 0x%x, value_id = 0x%x, size = 0x%lx, label_redirect = 0x%x\n", node, nodes[node].phi[n].reg, value_id, labels[value_id].size_bits, label_redirect[value_id].redirect);
 					size_bits = labels[value_id].size_bits;
 					if (size_bits == 0) {
 						continue;
@@ -5389,7 +5398,7 @@ int main(int argc, char *argv[])
 	/* Enter value id/label id of param into phi with src node 0. */
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
 		if (external_entry_points[l].valid && external_entry_points[l].type == 1) {
-			tmp = fill_phi_src_value_id(self, external_entry_points[l].nodes, external_entry_points[l].nodes_size);
+			tmp = fill_phi_src_value_id(self, l);
 		}
 	}
 	for (l = 0; l < EXTERNAL_ENTRY_POINTS_MAX; l++) {
