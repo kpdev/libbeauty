@@ -811,6 +811,59 @@ int execute_instruction(struct self_s *self, struct process_state_s *process_sta
 	instruction = &inst->instruction;
 
 	print_inst_short(self, instruction);
+	switch (instruction->opcode) {
+	case NOP:
+		break;
+	case CMP:
+	case TEST:
+		if ((instruction->srcA.value_size == 0) ||
+			(instruction->srcB.value_size == 0)) {
+			debug_print(DEBUG_EXE, 1, "ERROR: value_size == 0\n");
+			exit(1);
+		}
+		break;
+	case MOV:
+	case NEG:
+	case NOT:
+	case TRUNC:
+		if ((instruction->srcA.value_size == 0) ||
+			(instruction->dstA.value_size == 0)) {
+			debug_print(DEBUG_EXE, 1, "ERROR: value_size == 0\n");
+			exit(1);
+		}
+		break;
+	case ADC:
+	case ADD:
+	case MUL:
+	case IMUL:
+	case SBB:
+	case SUB:
+	case rAND:
+	case OR:
+	case XOR:
+	case SHL:
+	case SHR:
+	case SAL:
+	case SAR:
+		if ((instruction->srcA.value_size == 0) ||
+			(instruction->srcB.value_size == 0) ||
+			(instruction->dstA.value_size == 0)) {
+			debug_print(DEBUG_EXE, 1, "ERROR: value_size == 0\n");
+			exit(1);
+		}
+		break;
+	case LOAD:
+	case STORE:
+	case JMPT:
+	case JMP:
+	case CALL:
+	case IF:
+		break;
+	default:
+		debug_print(DEBUG_EXE, 1, "ERROR: Unchecked value_size\n");
+		exit(1);
+		break;
+	}
 
 	switch (instruction->opcode) {
 	case NOP:
