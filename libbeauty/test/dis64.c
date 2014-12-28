@@ -724,9 +724,9 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 		inst = nodes[node].inst_start;
 		debug_print(DEBUG_MAIN, 1, "Entry_point:0x%x, In Block:0x%x\n", entry_point, node);
 		do {
-			debug_print(DEBUG_MAIN, 1, "inst:0x%x\n", inst);
 			inst_log1 = &inst_log_entry[inst];
 			instruction =  &inst_log1->instruction;
+			print_inst(self, instruction, inst, NULL);
 			switch (instruction->opcode) {
 			case NOP:
 				/* Nothing to do */
@@ -847,7 +847,7 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 			case ICMP:
 				if ((instruction->srcA.store == STORE_REG) &&
 					(instruction->srcA.indirect == IND_DIRECT)) {
-					nodes[node].used_register[instruction->srcA.index].dst = inst;
+					nodes[node].used_register[instruction->srcA.index].src = inst;
 					debug_print(DEBUG_MAIN, 1, "Seen1A:0x%"PRIx64", SRC\n", instruction->srcA.index);
 					if (nodes[node].used_register[instruction->srcA.index].seen == 0) {
 						nodes[node].used_register[instruction->srcA.index].seen = 1;
@@ -1389,12 +1389,15 @@ int fill_phi_src_value_id(struct self_s *self, int entry_point)
 		if (nodes[node].phi_size > 0) {
 			printf("nodes[node].phi_size = 0x%x, nodes[node].prev_size = 0x%x\n", nodes[node].phi_size, nodes[node].prev_size);
 			for (n = 0; n < nodes[node].phi_size; n++) {
+				reg = nodes[node].phi[n].reg;
+				printf("n = 0x%x, nodes[node].phi[n].reg = 0x%x, phi_node_size = 0x%x\n", n, reg, nodes[node].phi[n].phi_node_size);
 				for (m = 0; m < nodes[node].phi[n].phi_node_size; m++) {
 					node_source = nodes[node].phi[n].phi_node[m].node;
-					reg = nodes[node].phi[n].reg;
+					printf("m = 0x%x, node_source = 0x%x\n", m, node_source);
 					/* FIXME: What to do if node_source == 0 ? */
 					if (node_source > 0) {
 						inst = nodes[node_source].used_register[reg].dst;
+						printf("inst = nodes[node_source].used_register[reg].dst = 0x%x\n", inst);
 						if (inst == 0) {
 							/* Use the node_source phi instead. */
 							for (l = 0; l < nodes[node_source].phi_size; l++) {
@@ -4840,6 +4843,7 @@ int main(int argc, char *argv[])
 		debug_print(DEBUG_MAIN, 1, "INFO: flag_result_users 0xe2c = 0x%x\n", self->flag_result_users[0xe2c]);
 	}
 	debug_print(DEBUG_MAIN, 1, "got here I-4\n");
+	/* This function changes SBB to other instructions, like the CMP to ICMP. */
 	tmp = fix_flag_dependency_instructions(self);
 	if (inst_log > 0xe2c) {
 		debug_print(DEBUG_MAIN, 1, "INFO: flag_result_users 0xe2c = 0x%x\n", self->flag_result_users[0xe2c]);
