@@ -1409,9 +1409,17 @@ int fill_phi_src_value_id(struct self_s *self, int entry_point)
 							/* FIXME: Check that value3 is the same reg */
 							inst_log1 =  &inst_log_entry[inst];
 							instruction =  &inst_log1->instruction;
-							value_id = inst_log1->value3.value_id;
-							printf("JCD:VALUE3:fill_phi_src_value_id inst = 0x%x, value_id = 0x%x, reg = 0x0%x\n", inst, value_id, reg);
-							print_inst(self, instruction, inst, labels);
+							if ((instruction->dstA.store == 1) &&
+								(instruction->dstA.indirect == 0) &&
+								(instruction->dstA.index == reg)) {
+								value_id = inst_log1->value3.value_id;
+							} else {
+								printf("JCD:VALUE3:fill_phi_src_value_id inst = 0x%x, value_id = 0x%x, reg = 0x0%x\n", inst, value_id, reg);
+								print_inst(self, instruction, inst, labels);
+								debug_print(DEBUG_ANALYSE_PHI, 1,
+									"FAILED: fill_phi_src_value_id: src reg does not equal dst reg\n");
+									exit(1);
+							}
 						}
 						if (value_id == 0) {
 							printf("FAILED: fill_phi_src_value_id value_id should not be 0\n");
