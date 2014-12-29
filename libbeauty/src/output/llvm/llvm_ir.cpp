@@ -91,11 +91,11 @@ int sprint_value(raw_string_ostream &OS1, Value *valueA)
 int sprint_srcA_srcB(raw_string_ostream &OS1, Value *srcA, Value *srcB)
 {
 	if (!srcA) {
-		debug_print(DEBUG_OUTPUT_LLVM, 1, "ERROR: srcA NULL\n");
+		printf("ERROR: srcA NULL\n");
 		exit(1);
 	}
 	if (!srcB) {
-		debug_print(DEBUG_OUTPUT_LLVM, 1, "ERROR: srcB NULL\n");
+		printf("ERROR: srcB NULL\n");
 		exit(1);
 	}
 	srcA->print(OS1);
@@ -155,7 +155,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			if (!value[value_id]) {
 				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 				if (tmp) {
-					debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. dstA value_id = 0x%x\n", value_id);
+					printf("ERROR: failed LLVM Value is NULL. dstA value_id = 0x%x\n", value_id);
 					exit(1);
 				}
 			}
@@ -176,7 +176,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -185,7 +185,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -218,7 +218,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -239,7 +239,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -285,7 +285,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -294,7 +294,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -327,7 +327,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -336,7 +336,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -369,7 +369,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -378,7 +378,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -419,7 +419,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 				value_id = external_entry_point->label_redirect[call_info->params_reg[n]].redirect;
 				debug_print(DEBUG_OUTPUT_LLVM, 1, "call_info_params = 0x%x->0x%x, %p\n", call_info->params_reg[n], value_id, value[value_id]);
 				if (!value_id) {
-					debug_print(DEBUG_OUTPUT_LLVM, 1, "ERROR: invalid call_info_param\n");
+					printf("ERROR: invalid call_info_param\n");
 					exit(1);
 				}
 				vector_params.push_back(value[value_id]);
@@ -461,7 +461,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL\n");
+				printf("ERROR: failed LLVM Value is NULL\n");
 				result = 2;
 				exit(1);
 				break;
@@ -488,7 +488,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -523,7 +523,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
 				tmp = label_to_string(&external_entry_point->labels[value_id], buffer, 1023);
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x:%s\n", value_id, buffer);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x:%s\n", value_id, buffer);
 				exit(1);
 			}
 		}
@@ -533,7 +533,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
 				tmp = label_to_string(&external_entry_point->labels[value_id], buffer, 1023);
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x:%s\n", value_id, buffer);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x:%s\n", value_id, buffer);
 				exit(1);
 			}
 		}
@@ -562,7 +562,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
 				tmp = label_to_string(&external_entry_point->labels[value_id], buffer, 1023);
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x:%s\n", value_id, buffer);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x:%s\n", value_id, buffer);
 				exit(1);
 			}
 		}
@@ -599,7 +599,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			if (!value[value_id]) {
 				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 				if (tmp) {
-					debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+					printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 					exit(1);
 				}
 			}
@@ -608,7 +608,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			if (!value[value_id]) {
 				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 				if (tmp) {
-					debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+					printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 					exit(1);
 				}
 			}
@@ -649,7 +649,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			if (!value[value_id]) {
 				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 				if (tmp) {
-					debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+					printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 					exit(1);
 				}
 			}
@@ -658,7 +658,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			if (!value[value_id]) {
 				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 				if (tmp) {
-					debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+					printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 					exit(1);
 				}
 			}
@@ -707,6 +707,13 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		value_id = external_entry_point->label_redirect[inst_log1->value1.value_id].redirect;
 		if (value_id) {
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: srcA value_id 0x%x\n", inst, value_id);
+			if (!value[value_id]) {
+				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+				if (tmp) {
+					printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+					exit(1);
+				}
+			}
 			srcA = value[value_id];
 		} else {
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: FIXME: Invalid srcA value_id\n", inst);
@@ -716,12 +723,19 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		value_id = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
 		if (value_id) {
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: dstA value_id 0x%x\n", inst, value_id);
+			if (!value[value_id]) {
+				tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
+				if (tmp) {
+					printf("ERROR: failed LLVM Value is NULL. dstA value_id = 0x%x\n", value_id);
+					exit(1);
+				}
+			}
 			srcB = value[value_id];
 		} else {
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: FIXME: Invalid dstA value_id\n", inst);
 			break;
 		}
-		debug_print(DEBUG_OUTPUT_LLVM, 1, "srcA = %p, srcB = %p\n", srcA, srcB);
+		debug_print(DEBUG_OUTPUT_LLVM, 1, "srcA = %p, dstA = %p\n", srcA, srcB);
 		sprint_srcA_srcB(OS1, srcA, srcB);
 		debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
 		Buf1.clear();
@@ -749,7 +763,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -758,7 +772,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcB value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -799,7 +813,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -836,7 +850,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		if (!value[value_id]) {
 			tmp = LLVM_ir_export::fill_value(self, value, value_id, external_entry);
 			if (tmp) {
-				debug_print(DEBUG_OUTPUT_LLVM, 1, "failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
+				printf("ERROR: failed LLVM Value is NULL. srcA value_id = 0x%x\n", value_id);
 				exit(1);
 			}
 		}
@@ -850,7 +864,7 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 		break;
 
 	default:
-		debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: OPCODE = 0x%x. Not yet handled.\n", inst, inst_log1->instruction.opcode);
+		printf("ERROR: LLVM 0x%x: OPCODE = 0x%x. Not yet handled.\n", inst, inst_log1->instruction.opcode);
 		exit(1);
 		result = 1;
 		break;
