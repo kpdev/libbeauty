@@ -2,6 +2,7 @@
 
 int test44(int var1) {
 	int n;
+	n = 0;
 	do {
 		n++;
 		var1--;
