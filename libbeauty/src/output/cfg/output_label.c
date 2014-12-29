@@ -651,7 +651,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 		switch (instruction->opcode) {
 		case LOAD:
 			if (inst_log1->value1.value_type == 6) {
-				debug_print(DEBUG_OUTPUT, 1, "ERROR1 %d\n", instruction->opcode);
+				debug_print(DEBUG_OUTPUT, 1, "ERROR1\n");
 				//break;
 			}
 			if (inst_log1->value1.value_type == 5) {
@@ -729,7 +729,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 
 		case STORE:
 			if (inst_log1->value1.value_type == 6) {
-				debug_print(DEBUG_OUTPUT, 1, "ERROR1 %d\n", instruction->opcode);
+				debug_print(DEBUG_OUTPUT, 1, "ERROR1\n");
 				//break;
 			}
 			if (inst_log1->value1.value_type == 5) {
@@ -815,7 +815,7 @@ int output_inst_in_c(struct self_s *self, struct process_state_s *process_state,
 		case ZEXT:
 		case TRUNC:
 			if (inst_log1->value1.value_type == 6) {
-				debug_print(DEBUG_OUTPUT, 1, "ERROR1 %d\n", instruction->opcode);
+				debug_print(DEBUG_OUTPUT, 1, "ERROR1\n");
 				//break;
 			}
 			if (inst_log1->value1.value_type == 5) {
