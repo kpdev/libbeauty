@@ -1137,7 +1137,7 @@ int LLVM_ir_export::output(struct self_s *self)
 					int redirect_value_id;
 					int first_previous_node;
 					PHINode* phi_node;
-					printf("LLVM:phi 0x%x, value_id = 0x%x\n", m, value_id);
+					printf("LLVM:phi 0x%x, value_id = 0x%x, reg=0x%x\n", m, value_id, nodes[node].phi[m].reg);
 					tmp = label_to_string(&labels[value_id], buffer, 1023);
 					if (labels[value_id].lab_pointer) {
 						size_bits = labels[m].pointer_type_size_bits;
