@@ -1830,6 +1830,52 @@ int assign_labels_to_src(struct self_s *self, int entry_point, int node)
 								entry_point, node, inst, stack_address);
 
 							if (memory->value_scope == 1) {
+								/* PARAM stack */
+								inst_log1->value1.value_id = variable_id;
+								memory->value_id = variable_id;
+								memset(&label, 0, sizeof(struct label_s));
+								ret = log_to_label(instruction->srcA.store,
+									instruction->srcA.indirect,
+									instruction->srcA.index,
+									instruction->srcA.value_size,
+									instruction->srcA.relocated,
+									inst_log1->value1.value_scope,
+									inst_log1->value1.value_id,
+									inst_log1->value1.indirect_offset_value,
+									&label);
+								if (ret) {
+									debug_print(DEBUG_MAIN, 1, "Inst 0x%x:0x%x:0x%04x:LOAD srcA unknown label\n",
+										entry_point, node, inst);
+									exit(1);
+								}
+
+								debug_print(DEBUG_MAIN, 1, "value to log_to_label:inst = 0x%x:0x%x:0x%04x: LOAD 0x%x, 0x%"PRIx64", 0x%x, 0x%x, 0x%"PRIx64", 0x%"PRIx64"\n",
+									entry_point,
+									node,
+									inst,
+									instruction->srcA.indirect,
+									instruction->srcA.index,
+									instruction->srcA.relocated,
+									inst_log1->value1.value_scope,
+									inst_log1->value1.value_id,
+									inst_log1->value1.indirect_offset_value);
+
+								debug_print(DEBUG_MAIN, 1, "variable_id = 0x%x\n", variable_id);
+								if (variable_id >= 10000) {
+									debug_print(DEBUG_MAIN, 1, "variable_id overrun 10000 limit. Trying to write to %d\n",
+											variable_id);
+									exit(1);
+								}
+
+								external_entry_point->label_redirect[variable_id].redirect = variable_id;
+								external_entry_point->labels[variable_id].scope = label.scope;
+								external_entry_point->labels[variable_id].type = label.type;
+								external_entry_point->labels[variable_id].value = label.value;
+								external_entry_point->labels[variable_id].size_bits = label.size_bits;
+								external_entry_point->labels[variable_id].lab_pointer += label.lab_pointer;
+								variable_id++;
+							} else if (memory->value_scope == 2) {
+								/* LOCAL stack */
 								inst_log1->value1.value_id = variable_id;
 								memory->value_id = variable_id;
 								memset(&label, 0, sizeof(struct label_s));
