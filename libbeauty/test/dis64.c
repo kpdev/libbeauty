@@ -97,6 +97,7 @@ int debug_analyse = 0;
 int debug_analyse_paths = 0;
 int debug_analyse_phi = 0;
 int debug_output = 0;
+int debug_output_llvm = 0;
 
 void setLogLevel()
 {
@@ -116,6 +117,8 @@ void setLogLevel()
 		debug_analyse_phi = 1;
 	if (getenv("ENABLE_DEBUG_OUTPUT"))
 		debug_output = 1;
+	if (getenv("ENABLE_DEBUG_OUTPUT_LLVM"))
+		debug_output_llvm = 1;
 }
 
 void dbg_print(const char* func, int line, int module, int level, const char *format, ...)
@@ -168,6 +171,12 @@ void dbg_print(const char* func, int line, int module, int level, const char *fo
 	case DEBUG_OUTPUT:
 		if (level <= debug_output) {
 			dprintf(STDERR_FILENO, "DEBUG_OUTPUT,0x%x %s,%d: ", level, func, line);
+			vdprintf(STDERR_FILENO, format, ap);
+		}
+		break;
+	case DEBUG_OUTPUT_LLVM:
+		if (level <= debug_output_llvm) {
+			dprintf(STDERR_FILENO, "DEBUG_OUTPUT_LLVM,0x%x %s,%d: ", level, func, line);
 			vdprintf(STDERR_FILENO, format, ap);
 		}
 		break;

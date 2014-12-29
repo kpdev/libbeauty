@@ -10,6 +10,7 @@
 #include <global_struct.h>
 
 #include <output.h>
+#include <debug_llvm.h>
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -89,6 +90,14 @@ int sprint_value(raw_string_ostream &OS1, Value *valueA)
 
 int sprint_srcA_srcB(raw_string_ostream &OS1, Value *srcA, Value *srcB)
 {
+	if (!srcA) {
+		debug_print(DEBUG_OUTPUT_LLVM, 1, "ERROR: srcA NULL\n");
+		exit(1);
+	}
+	if (!srcB) {
+		debug_print(DEBUG_OUTPUT_LLVM, 1, "ERROR: srcB NULL\n");
+		exit(1);
+	}
 	srcA->print(OS1);
 	OS1 << "\n";
 	srcB->print(OS1);

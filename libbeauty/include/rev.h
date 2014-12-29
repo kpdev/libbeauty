@@ -30,26 +30,7 @@
 #include <inttypes.h>
 #include <global_struct.h>
 #include <opcodes.h>
-
-#define DEBUG_MAIN 1
-#define DEBUG_INPUT_BFD 2
-#define DEBUG_INPUT_DIS 3
-#define DEBUG_OUTPUT 4
-#define DEBUG_EXE 5
-#define DEBUG_ANALYSE 6
-#define DEBUG_ANALYSE_PATHS 7
-#define DEBUG_ANALYSE_PHI 8
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* !defined(__cplusplus) */
-
-extern void dbg_print(const char* func, int line, int module, int level, const char *format, ...) __attribute__((__format__ (printf, 5, 6)));
-#define debug_print(module, level, format, ...) dbg_print(__FUNCTION__, __LINE__, module, level, format, ##__VA_ARGS__)
-
-#ifdef __cplusplus
-}
-#endif /* !defined(__cplusplus) */
+#include <debug_llvm.h>
 
 #include <dis.h>
 #include <exe.h>
