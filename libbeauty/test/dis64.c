@@ -850,6 +850,10 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 					nodes[node].used_register[instruction->srcA.index].src = inst;
 					debug_print(DEBUG_MAIN, 1, "Seen1A:0x%"PRIx64", SRC\n", instruction->srcA.index);
 					if (nodes[node].used_register[instruction->srcA.index].seen == 0) {
+						if (instruction->srcA.value_size == 0) {
+							debug_print(DEBUG_MAIN, 1, "ERROR: Size == 0\n");
+							exit(1);
+						}
 						nodes[node].used_register[instruction->srcA.index].seen = 1;
 						nodes[node].used_register[instruction->srcA.index].size = instruction->srcA.value_size;
 						nodes[node].used_register[instruction->srcA.index].src_first = inst;
@@ -861,6 +865,10 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 					nodes[node].used_register[instruction->srcB.index].src = inst;
 					debug_print(DEBUG_MAIN, 1, "Seen1B:0x%"PRIx64" SRC\n", instruction->srcB.index);
 					if (nodes[node].used_register[instruction->srcB.index].seen == 0) {
+						if (instruction->srcB.value_size == 0) {
+							debug_print(DEBUG_MAIN, 1, "ERROR: Size == 0\n");
+							exit(1);
+						}
 						nodes[node].used_register[instruction->srcB.index].seen = 1;
 						nodes[node].used_register[instruction->srcB.index].size = instruction->srcB.value_size;
 						nodes[node].used_register[instruction->srcB.index].src_first = inst;
@@ -872,6 +880,10 @@ int fill_node_used_register_table(struct self_s *self, int entry_point)
 					nodes[node].used_register[instruction->dstA.index].dst = inst;
 					debug_print(DEBUG_MAIN, 1, "Seen2:0x%"PRIx64", DST\n", instruction->dstA.index);
 					if (nodes[node].used_register[instruction->dstA.index].seen == 0) {
+						if (instruction->dstA.value_size == 0) {
+							debug_print(DEBUG_MAIN, 1, "ERROR: Size == 0\n");
+							exit(1);
+						}
 						nodes[node].used_register[instruction->dstA.index].seen = 2;
 						nodes[node].used_register[instruction->dstA.index].size = instruction->dstA.value_size;
 						debug_print(DEBUG_MAIN, 1, "Set2\n");
@@ -1479,7 +1491,7 @@ int fill_phi_dst_size_from_src_size(struct self_s *self, int entry_point)
 					}
 				}
 				label = &labels[nodes[node].phi[n].value_id];
-				printf("fill_phi_dst_size setting phi dst size_bits to 0x%x\n", first_size);
+				printf("fill_phi_dst_size setting phi dst value_id = 0x%x size_bits to 0x%x\n", value_id, first_size);
 				label->size_bits = first_size;
 			}
 		}
