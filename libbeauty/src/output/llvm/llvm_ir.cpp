@@ -99,9 +99,9 @@ int sprint_srcA_srcB(raw_string_ostream &OS1, Value *srcA, Value *srcB)
 		exit(1);
 	}
 	srcA->print(OS1);
-	OS1 << "\n";
+	OS1 << ", ";
 	srcB->print(OS1);
-	OS1 << "\n";
+	OS1 << ", ";
 	OS1 << "srcA_type = ";
 	srcA->getType()->print(OS1);
 	OS1 << ", srcB_type = ";
