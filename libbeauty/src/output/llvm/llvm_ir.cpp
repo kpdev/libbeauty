@@ -429,12 +429,16 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			vector_params.push_back(const_ptr_5); /* EIP */
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: args_size = 0x%lx\n", inst, vector_params.size());
 			tmp = label_to_string(&external_entry_point->labels[inst_log1->value3.value_id], buffer, 1023);
-			declaration[0].F->dump();
+			declaration[0].F->print(OS1);
+			debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+			Buf1.clear();
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: declaration dump done.\n", inst);
 			for(auto i : vector_params) {
 				debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: dumping vector_params %p\n", inst, i);
 				if (i) {
-					i->dump();
+					i->print(OS1);
+					debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+					Buf1.clear();
 				}
 			}
 			function_to_call = 0;
@@ -960,6 +964,8 @@ int LLVM_ir_export::output(struct self_s *self)
 	struct label_s *label;
 	char buffer[1024];
 	int index;
+	std::string Buf1;
+	raw_string_ostream OS1(Buf1);
 	
 	struct external_entry_point_s *external_entry_points = self->external_entry_points;
 	struct declaration_s *declaration = static_cast <struct declaration_s *> (calloc(EXTERNAL_ENTRY_POINTS_MAX, sizeof (struct declaration_s)));
@@ -1055,7 +1061,9 @@ int LLVM_ir_export::output(struct self_s *self)
 					Function *F =
 						Function::Create(declaration[l].FT, Function::ExternalLinkage, function_name, mod);
 					declaration[l].F = F;
-					declaration[l].F->dump();
+					declaration[l].F->print(OS1);
+					debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+					Buf1.clear();
 				}
 			}
 
@@ -1096,7 +1104,9 @@ int LLVM_ir_export::output(struct self_s *self)
 				tmp = label_to_string(&(labels[index]), buffer, 1023);
 				debug_print(DEBUG_OUTPUT_LLVM, 1, "Adding reg param:%s:value index=0x%x\n", buffer, index);
 				value[index]->setName(buffer);
-				value[index]->dump();
+				sprint_value(OS1, value[index]);
+				debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+				Buf1.clear();
 				args++;
 			}
 			for (m = 0; m < external_entry_points[n].params_stack_ordered_size; m++) {
@@ -1105,7 +1115,9 @@ int LLVM_ir_export::output(struct self_s *self)
 				tmp = label_to_string(&(labels[index]), buffer, 1023);
 				debug_print(DEBUG_OUTPUT_LLVM, 1, "Adding stack param:%s:value index=0x%x\n", buffer, index);
 				value[index]->setName(buffer);
-				value[index]->dump();
+				sprint_value(OS1, value[index]);
+				debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+				Buf1.clear();
 				args++;
 			}
 #endif
@@ -1184,8 +1196,12 @@ int LLVM_ir_export::output(struct self_s *self)
 					redirect_value_id = label_redirect[value_id1].redirect;
 					first_previous_node = nodes[node].phi[m].phi_node[0].first_prev_node;
 					debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM phi value_id1 = 0x%x, fpn = 0x%x\n", redirect_value_id, first_previous_node);
-					value[value_id]->dump();
-					value[redirect_value_id]->dump();
+					sprint_value(OS1, value[value_id]);
+					debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+					Buf1.clear();
+					sprint_value(OS1, value[redirect_value_id]);
+					debug_print(DEBUG_OUTPUT_LLVM, 1, "%s\n", Buf1.c_str());
+					Buf1.clear();
 					if (redirect_value_id > 0) {
 						phi_node->addIncoming(value[redirect_value_id], bb[first_previous_node]);
 					}
