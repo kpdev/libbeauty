@@ -6,6 +6,7 @@ export ENABLE_DEBUG_ANALYSE=0
 export ENABLE_DEBUG_ANALYSE_PATHS=0
 export ENABLE_DEBUG_ANALYSE_PHI=0
 export ENABLE_DEBUG_OUTPUT=0
+export ENABLE_DEBUG_OUTPUT_LLVM=0
 
 echo -n test10_ll:
 if ../../../test/dis64 test10_ll.o 2>&1 | grep -q "END - FINISHED PROCESSING"
@@ -42,3 +43,25 @@ then
 else
 	echo "FAILED"
 fi
+echo -n test15_ll:
+if ../../../test/dis64 test15_ll.o 2>&1 | grep -q "END - FINISHED PROCESSING"
+then
+	echo "PASSED"
+else
+	echo "FAILED"
+fi
+echo -n test16_ll:
+if ../../../test/dis64 test16_ll.o 2>&1 | grep -q "END - FINISHED PROCESSING"
+then
+	echo "PASSED"
+else
+	echo "FAILED"
+fi
+echo -n test17_ll:
+if ../../../test/dis64 test17_ll.o 2>&1 | grep -q "END - FINISHED PROCESSING"
+then
+	echo "PASSED"
+else
+	echo "FAILED"
+fi
+
