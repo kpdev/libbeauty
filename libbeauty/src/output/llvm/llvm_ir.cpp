@@ -724,7 +724,8 @@ int LLVM_ir_export::add_instruction(struct self_s *self, Module *mod, struct dec
 			break;
 		}
 		/* Note: The srcB here should be value3 as it is a STORE instruction */
-		value_id = external_entry_point->label_redirect[inst_log1->value3.value_id].redirect;
+		/*       But it depends on whether the value3 is a constant or a calculated pointer */
+		value_id = external_entry_point->label_redirect[inst_log1->value2.value_id].redirect;
 		if (value_id) {
 			debug_print(DEBUG_OUTPUT_LLVM, 1, "LLVM 0x%x: dstA value_id 0x%x\n", inst, value_id);
 			if (!value[value_id]) {
