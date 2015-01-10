@@ -64,4 +64,11 @@ then
 else
 	echo "FAILED"
 fi
+echo -n test18_ll:
+if ../../../test/dis64 test18_ll.o 2>&1 | grep -q "END - FINISHED PROCESSING"
+then
+	echo "PASSED"
+else
+	echo "FAILED"
+fi
 
