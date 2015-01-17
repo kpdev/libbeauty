@@ -6459,6 +6459,20 @@ int main(int argc, char *argv[])
 				dprintf(fd, "*");
 			}
 			output_function_name(fd, &external_entry_points[l]);
+			/* FIXME: Params */
+			if (external_entry_points[l].params_size > 0) {
+				char buffer[1024];
+				for (n = 0; n < external_entry_points[l].params_size; n++) {
+					int label_index;
+					label_index = external_entry_points[l].params[n];
+					tmp = label_to_string(&external_entry_points[l].labels[label_index], buffer, 1023);
+					dprintf(fd, "%s", buffer);
+					if (n + 1 < external_entry_points[l].params_size) {
+						tmp = dprintf(fd, ", ");
+					}
+				}
+			}
+#if 0
 			tmp_state = 0;
 			/* Output param_reg */
 			for (n = 0; n < external_entry_points[l].params_reg_ordered_size; n++) {
@@ -6502,6 +6516,7 @@ int main(int argc, char *argv[])
 				dprintf(fd, "%s", buffer);
 				tmp_state++;
 			}
+#endif
 			tmp = dprintf(fd, ")\n{\n");
 			for (n = 0; n < external_entry_points[l].locals_size; n++) {
 				struct label_s *label;
