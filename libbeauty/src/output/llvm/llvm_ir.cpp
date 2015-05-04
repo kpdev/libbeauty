@@ -1262,10 +1262,13 @@ int LLVM_ir_export::output(struct self_s *self)
 				}
 			}
 			std::string ErrorInfo;
-			raw_fd_ostream OS(output_filename, ErrorInfo, llvm::sys::fs::F_None);
+			std::error_code error_code;
+			raw_fd_ostream OS(output_filename, error_code, llvm::sys::fs::F_None);
 
-			if (!ErrorInfo.empty())
+			if (error_code) {
+				// *ErrorMessage = strdup(error_code.message().c_str());
 				return -1;
+			}
 
 			WriteBitcodeToFile(mod, OS);
 			delete mod;
