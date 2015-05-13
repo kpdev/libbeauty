@@ -49,8 +49,8 @@
 #define ENTRY_POINTS_SIZE 1000
 #define AST_SIZE 300
 
-#define REG_PARAMS_ORDER_MAX 8
-/* RSP, RBP, RDI, RSI, RDX, RCX, R08, R09  */
+#define REG_PARAMS_ORDER_MAX 9
+/* RIP, RSP, RBP, RDI, RSI, RDX, RCX, R08, R09  */
 extern int reg_params_order[];
 extern int reg_params_order_size;
 

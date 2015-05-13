@@ -285,15 +285,15 @@ case "$1" in
     run_libtoolize
     ;;
   noconfig)
-    run_aclocal
     run_libtoolize
+    run_aclocal
     run_autoheader
     run_automake
     run_autoconf
     ;;
   *)
-    run_aclocal
     run_libtoolize
+    run_aclocal
     run_autoheader
     run_automake
     run_autoconf

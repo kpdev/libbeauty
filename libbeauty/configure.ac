@@ -1,6 +1,8 @@
-AC_INIT("libbeauty",0.2.0)
-AM_INIT_AUTOMAKE
 AC_PREREQ(2.53)
+
+AC_INIT([libbeauty],0.2.0)
+AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE
 
 dnl The libtool version numbers (LT_*); Don't even think about faking this!
 dnl
@@ -41,7 +43,7 @@ dnl ------------------------------------
 dnl Flag setup
 dnl ------------------------------------
 
-AM_CPPFLAGS="-I\$(top_srcdir)/include -I/usr/include/llvm-3.5 -I/usr/include/llvm-c-3.5"
+AM_CPPFLAGS="-I\$(top_srcdir)/include -I/usr/include/llvm-3.6 -I/usr/include/llvm-c-3.6"
 
 CXXFLAGS="-O0 -Wall -g3 -std=c++11"
 DEBUG_CXXFLAGS="-g3 -Wall"
